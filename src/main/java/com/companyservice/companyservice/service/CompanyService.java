@@ -44,7 +44,6 @@ public class CompanyService {
 				user.setName("Admin");
 				user.setPhone(payload.getPhone());
 				user.setStatus(payload.isStatus());
-				
 				user = userRepository.save(user);
 			}catch(Exception e) {
 				if(e instanceof DataIntegrityViolationException) {

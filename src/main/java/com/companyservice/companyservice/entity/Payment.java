@@ -9,7 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -24,13 +23,11 @@ public class Payment {
 	@Id
 	private String paymentId;
 	
-	//@NotNull(message = "Company Id cannot be blank")
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
 	private Company companyId;
 	
-	//@NotNull(message = "Subscription Id cannot be blank")
 	@JoinColumn(name = "id", referencedColumnName = "id")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
