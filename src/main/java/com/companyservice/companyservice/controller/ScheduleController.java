@@ -41,9 +41,15 @@ public class ScheduleController {
 	}
 	
 	
-	@GetMapping("/schedule/getAllSchedules")
-	public ResponseEntity<?> getScheduleTimeZones() throws Exception {
-		List<Schedule> schedules =  scheduleService.getScheduleTimeZonesDetails();
+	@GetMapping("/schedule/getAllSchedules/{page}/{limit}")
+	public ResponseEntity<?> getScheduleTimeZones(@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		List<Schedule> schedules =  scheduleService.getScheduleTimeZonesDetails(page,limit);
 		if(!schedules.isEmpty()) {
 			return new ResponseEntity<>(schedules, HttpStatus.OK);
 		}

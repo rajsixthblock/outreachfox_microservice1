@@ -66,6 +66,23 @@ public class UserController {
 			throw new DetailsNotFound("Companies data not found");
 		}
 	}
+	@Authorization
+	@GetMapping("/user/getUsers/{companyId}/{page}/{limit}")
+	public ResponseEntity<?> getUsers(@PathVariable String companyId,@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		List<User> companyDetails =  userService.getUsersDetails(companyId,page,limit);
+		if(!companyDetails.isEmpty()) {
+			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Companies data not found");
+		}
+	}
 	
 	@Authorization
 	@GetMapping("/user/getByID/{id}")

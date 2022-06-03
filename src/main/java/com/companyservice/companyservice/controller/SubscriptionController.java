@@ -43,9 +43,15 @@ public class SubscriptionController {
 	}
 	
 	@Authorization
-	@GetMapping("/getAllPlans")
-	public ResponseEntity<?> getPlans() throws Exception {
-		List<Subscription> subscriptions = subscriptionService.getAll();
+	@GetMapping("/getAllPlans/{page}/{limit}")
+	public ResponseEntity<?> getPlans(@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
 		if(!subscriptions.isEmpty()) {
 			return new ResponseEntity<>(subscriptions, HttpStatus.OK);
 		}else {

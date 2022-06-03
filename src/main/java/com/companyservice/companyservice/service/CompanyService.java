@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.companyservice.companyservice.SecurityConfiguration.SecurityConfig;
@@ -58,6 +61,20 @@ public class CompanyService {
 		try {
 			List<Company> companiesDetails = (List<Company>) companyRepository.findAll();
 			return companiesDetails;
+		}
+		catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	public List<Company> getCompaniesDetailsPagination(int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		try {
+			Page<Company> companiesDetails =  companyRepository.findAll(paging);
+			System.err.println(companiesDetails);
+			return  companiesDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

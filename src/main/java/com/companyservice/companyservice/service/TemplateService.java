@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.companyservice.companyservice.entity.*;
 import com.companyservice.companyservice.exception.BadRequestException;
@@ -35,11 +38,23 @@ public class TemplateService {
 		return newTemplate;
 	}
 	
-	
 	public List<Template> getTemplateDetails() throws Exception {
 		try {
 			List<Template> templateDetails = (List<Template>) templateRepository.findAll();
 			return templateDetails;
+		}
+		catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	public List<Template> getTemplateDetails(int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		try {
+			Page<Template> templateDetails =  templateRepository.findAll(paging);
+			return templateDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

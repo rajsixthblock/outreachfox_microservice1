@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Authorization.authorizationservice.annotation.Authorization;
@@ -45,6 +46,26 @@ public class CompanyController {
 	@GetMapping("/company/getCompanies")
 	public ResponseEntity<?> getCompanies() throws Exception {
 		List<Company> companiesDetails =  companyService.getCompaniesDetails();
+		if(!companiesDetails.isEmpty()) {
+			return new ResponseEntity<>(companiesDetails, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Companies data not found");
+		}
+	}
+	
+	@Authorization
+	@GetMapping("/company/getCompanies/{page}/{limit}")
+	public ResponseEntity<?> getCompaniesPagination(@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			System.out.println("1");
+			page = 1;
+		}
+		if(limit == 0) {
+			System.out.println(limit);
+			limit = 10;
+		}
+		List<Company> companiesDetails =  companyService.getCompaniesDetailsPagination(page,limit);
 		if(!companiesDetails.isEmpty()) {
 			return new ResponseEntity<>(companiesDetails, HttpStatus.OK);
 		}

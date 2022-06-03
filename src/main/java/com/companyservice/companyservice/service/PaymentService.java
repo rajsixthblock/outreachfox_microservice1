@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.companyservice.companyservice.entity.Company;
@@ -43,10 +46,11 @@ public class PaymentService {
 		return newPayment;
 	}
 	
-	public List<Payment> getPaymentDetails() throws Exception {
+	public List<Payment> getPaymentDetails(int pageNo,int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
-			List<Payment> paymentDetails = (List<Payment>) paymentRepository.findAll();
-			return paymentDetails;
+			Page<Payment> paymentDetails =  paymentRepository.findAll(paging);
+			return paymentDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -56,12 +60,13 @@ public class PaymentService {
 		return null;
 	}
 	
-	public List<Payment> getPaymentDetails(String companyId) throws Exception {
+	public List<Payment> getPaymentDetails(int pageNo,int pageSize,String companyId) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		Company company = new Company();
 		company.setCompanyId(companyId);
 		try {
-			List<Payment> paymentDetails =  ((PaymentRepository) paymentRepository).getByCompanyId(company);
-			return paymentDetails;
+			Page<Payment> paymentDetails =   paymentRepository.getByCompanyId(company,paging);
+			return paymentDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

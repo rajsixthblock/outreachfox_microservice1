@@ -34,8 +34,25 @@ public class TemplateController {
 		}
 	}
 	
+	@GetMapping("/template/getAllTemplates/{page}/{limit}")
+	public ResponseEntity<?> getTemplates(@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
+		if(!newTemplate.isEmpty()) {
+			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Template details not found");
+		}
+	}
 	@GetMapping("/template/getAllTemplates")
 	public ResponseEntity<?> getTemplates() throws Exception {
+		
 		List<Template> newTemplate =  templateService.getTemplateDetails();
 		if(!newTemplate.isEmpty()) {
 			return new ResponseEntity<>(newTemplate, HttpStatus.OK);

@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.companyservice.companyservice.entity.Schedule;
@@ -36,10 +39,11 @@ public class ScheduleService {
 	}
 	
 	
-	public List<Schedule> getScheduleTimeZonesDetails() throws Exception {
+	public List<Schedule> getScheduleTimeZonesDetails(int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
-			List<Schedule> scheduleDetails = (List<Schedule>) scheduleRepository.findAll();
-			return scheduleDetails;
+			Page<Schedule> scheduleDetails =  scheduleRepository.findAll(paging);
+			return scheduleDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

@@ -7,6 +7,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.companyservice.companyservice.entity.Subscription;
@@ -38,10 +41,11 @@ public class SubscriptionService {
 		return null;
 	}
 	
-	public List<Subscription> getAll() throws Exception{
+	public List<Subscription> getAll(int pageNo, int pageSize) throws Exception{
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
-			List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
-			return subscriptions;
+			Page<Subscription> subscriptions =  subscriptionRepository.findAll(paging);
+			return subscriptions.toList();
 		}catch(Exception e){
 			if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());

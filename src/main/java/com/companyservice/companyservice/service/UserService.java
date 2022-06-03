@@ -7,8 +7,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.Authorization.authorizationservice.model.TokenUtil;
+//import com.Authorization.authorizationservice.model.TokenUtil;
 import com.companyservice.companyservice.SecurityConfiguration.SecurityConfig;
 import com.companyservice.companyservice.entity.Company;
 import com.companyservice.companyservice.entity.User;
@@ -25,7 +28,7 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private SecurityConfig securityConfig;
-	private TokenUtil tokenUtil = new TokenUtil();
+	//private TokenUtil tokenUtil = new TokenUtil();
 	
 	public User creation(String companyId, User payload) throws Exception {
 		Company company = new Company();
@@ -56,10 +59,10 @@ public class UserService {
 				throw new Exception("Invalid password");
 			}
 			else {
-				String token = tokenUtil.generateToken(userDetails.getEmail());
+				//String token = tokenUtil.generateToken(userDetails.getEmail());
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("userDetails",userDetails);
-				jsonObject.put("token",token);
+				//jsonObject.put("token",token);
 				return jsonObject;
 			}
 		}
@@ -69,6 +72,22 @@ public class UserService {
 		try {
 			List<User> companiesDetails = (List<User>) userRepository.findByCompanyId(companyId);
 			return companiesDetails;
+		}
+		catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	
+	public List<User> getUsersDetails(String companyId,int pageNo,int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		try {
+			Company company = new Company();
+			company.setCompanyId(companyId);
+			Page<User> companiesDetails =  userRepository.findByCompanyId(company,paging);
+			return companiesDetails.toList();
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

@@ -41,9 +41,15 @@ public class PaymentController {
 		}
 	}
 	
-	@GetMapping("/payment/getAllPayments")
-	public ResponseEntity<?> getPayments() throws Exception {
-		List<Payment> newPayment =  paymentService.getPaymentDetails();
+	@GetMapping("/payment/getAllPayments/{page}/{limit}")
+	public ResponseEntity<?> getPayments(@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		List<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
 		if(!newPayment.isEmpty()) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
@@ -52,9 +58,17 @@ public class PaymentController {
 		}
 	}
 	
-	@GetMapping("/payment/getAll/{companyId}")
-	public ResponseEntity<?> getPayments(@PathVariable String companyId) throws Exception {
-		List<Payment> newPayment =  paymentService.getPaymentDetails(companyId);
+	@GetMapping("/payment/getAll/{companyId}/{page}/{limit}")
+	public ResponseEntity<?> getPayments(@PathVariable String companyId,@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			System.out.println("1");
+			page = 1;
+		}
+		if(limit == 0) {
+			System.out.println(limit);
+			limit = 10;
+		}
+		List<Payment> newPayment =  paymentService.getPaymentDetails(page,limit,companyId);
 		if(newPayment != null) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
