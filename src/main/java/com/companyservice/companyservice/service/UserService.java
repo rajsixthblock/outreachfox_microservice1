@@ -1,8 +1,13 @@
 package com.companyservice.companyservice.service;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+
+import javax.mail.SendFailedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
@@ -10,10 +15,17 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.Authorization.authorizationservice.model.TokenUtil;
 //import com.Authorization.authorizationservice.model.TokenUtil;
 import com.companyservice.companyservice.SecurityConfiguration.SecurityConfig;
+import com.companyservice.companyservice.controller.UserController;
 import com.companyservice.companyservice.entity.Company;
+import com.companyservice.companyservice.entity.Password;
 import com.companyservice.companyservice.entity.User;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
@@ -28,7 +40,11 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private SecurityConfig securityConfig;
-	//private TokenUtil tokenUtil = new TokenUtil();
+	@Autowired
+	private UserController	controllerClass;
+	@Autowired
+	private MailService mailing;
+	private TokenUtil tokenUtil = new TokenUtil();
 	
 	public User creation(String companyId, User payload) throws Exception {
 		Company company = new Company();
@@ -59,11 +75,21 @@ public class UserService {
 				throw new Exception("Invalid password");
 			}
 			else {
-				//String token = tokenUtil.generateToken(userDetails.getEmail());
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("userDetails",userDetails);
-				//jsonObject.put("token",token);
-				return jsonObject;
+				if(userDetails.isStatus()) {
+					String token = tokenUtil.generateToken(userDetails.getEmail());
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("userDetails",userDetails);
+					jsonObject.put("token",token);
+					return jsonObject;
+				}else {
+					WebMvcLinkBuilder activationlink =  linkTo(methodOn(controllerClass.getClass()).activationUser(userDetails.getCompanyId().getCompanyId(),userDetails.getUserId()));
+					try {
+						mailing.sendEmail(userDetails.getEmail(),"Account activation link.!",activationlink.toString());
+			        } catch (SendFailedException sendFailedException) {
+			        	throw new BadRequestException("Activation link email unsuccessfull.!");
+			        }
+					throw new BadRequestException("Your account is in deactivation mode . Activation link has been sent to your registered mail id, please check your mail");
+				}
 			}
 		}
 	}
@@ -97,10 +123,10 @@ public class UserService {
 		return null;
 	}
 	
-	public Optional<User> getUserByID(String id) throws Exception {
+	public User getUserByID(String id) throws Exception {
 		try {
-			Optional<User> companyDetails = userRepository.findById(id);
-			return companyDetails;
+			User userDetails = userRepository.getById(id);
+			return userDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -173,5 +199,28 @@ public class UserService {
 		else 
 			throw new DetailsNotFound("User does not exist.!"); 
 			return null;
+	}
+	
+	public User updatePassword(String id, Password payload) throws Exception {
+		if(userRepository.existsById(id)) {
+			User userDetails = userRepository.getById(id);
+			if(payload.getOldPassword().equals(securityConfig.passwordDecryption(userDetails.getPassword()))) {
+				userDetails.setPassword(securityConfig.passwordEncryption(payload.getNewPassword()));
+				try {
+					userDetails = userRepository.save(userDetails);
+					return userDetails;
+				}catch(Exception e){
+					if(e instanceof SQLException) {
+						throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+					}
+				}
+			}else {
+				throw new BadRequestException("Please enter valid password.!");
+			}
+		}
+		else {
+			throw new DetailsNotFound("User details not found");
+		}
+		return null;
 	}
 }

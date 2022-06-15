@@ -30,31 +30,32 @@ public class CompanyService {
 	private SecurityConfig securityConfig;
 	@Autowired
 	private UserRepository userRepository;
-	
-	public Company companyRegistration(Company payload) throws Exception {
+	public User companyRegistration(Company payload) throws Exception {
 		Company regCompany = new Company();
+		User user = new User();
 		if(companyRepository.existsByemail(payload.getEmail())) {
 			throw new BadRequestException("Company already exist with this email");
 		}
 		else {
 			payload.setPassword(securityConfig.passwordEncryption(payload.getPassword()));
 			try {
+				payload.setStatus(false);
 				regCompany = companyRepository.save(payload);
-				User user = new User();
 				user.setCompanyId(regCompany);
 				user.setEmail(payload.getEmail());
 				user.setPassword(payload.getPassword());
 				user.setName("Admin");
 				user.setPhone(payload.getPhone());
-				user.setStatus(payload.isStatus());
+				user.setStatus(false);
 				user = userRepository.save(user);
+				return user;
 			}catch(Exception e) {
 				if(e instanceof DataIntegrityViolationException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
 				}
 			}
 		}
-		return regCompany;
+		return user;
 	}
 	
 	public List<Company> getCompaniesDetails() throws Exception {
@@ -73,7 +74,6 @@ public class CompanyService {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Company> companiesDetails =  companyRepository.findAll(paging);
-			System.err.println(companiesDetails);
 			return  companiesDetails.toList();
 		}
 		catch(Exception e){
@@ -84,9 +84,9 @@ public class CompanyService {
 		return null;
 	}
 	
-	public Optional<Company> getCompanyByID(String id) throws Exception {
+	public Company getCompanyByID(String id) throws Exception {
 		try {
-			Optional<Company> companyDetails = companyRepository.findById(id);
+			Company companyDetails = companyRepository.getById(id);
 			return companyDetails;
 		}
 		catch(Exception e){
@@ -111,7 +111,6 @@ public class CompanyService {
 					companyDetails = setcompanyData(payload, companyDetails);
 				}
 			}
-			
 			try {
 				companyDetails = companyRepository.save(companyDetails);
 				return companyDetails;
@@ -164,6 +163,20 @@ public class CompanyService {
 		else 
 			throw new DetailsNotFound("Company does not exist.!"); 
 			return null;
+	}
+	
+	public Company activateCompany(String companyId,String userId) {
+		Company companyDetails = companyRepository.getById(companyId);
+		if(companyDetails.getCompanyId() == null) {
+			throw new DetailsNotFound("Company details not found.!");
+		}else {
+			companyDetails.setStatus(true);
+			companyDetails = companyRepository.save(companyDetails);
+			User userDetails = userRepository.getById(userId);
+			userDetails.setStatus(true);
+			userDetails = userRepository.save(userDetails);
+			return companyDetails;
+		}
 	}
 
 }

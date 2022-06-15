@@ -38,7 +38,7 @@ public class Company {
 	private String password;
 	
 	@Column(name = "`status`")
-	private boolean status;
+	private boolean status = false;
 	
 	@Column(name = "`address`", columnDefinition = "VARCHAR(150)")
 	private String address;
