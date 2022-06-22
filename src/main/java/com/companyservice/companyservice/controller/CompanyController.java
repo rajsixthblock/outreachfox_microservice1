@@ -13,6 +13,7 @@ import javax.mail.internet.AddressException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.service.CompanyService;
 import com.companyservice.companyservice.service.MailService;
+import com.companyservice.companyservice.service.UserService;
 
 import net.minidev.json.JSONObject;
 
@@ -41,21 +43,26 @@ import net.minidev.json.JSONObject;
 @RestController
 @Logging
 public class CompanyController {
-	
+	@Value("${login-link}")
+	private String userLoginPath;
 	@Autowired
 	private CompanyService companyService;
 	@Autowired
 	private MailService mailing;
-	
+	@Autowired
+	private UserService userService;
 	@PostMapping("/company/register")
 	public ResponseEntity<?> register(@RequestBody @Valid Company payload) throws Exception {
 		User regUser = companyService.companyRegistration(payload);
 		if(regUser.getCompanyId().getCompanyId() != null) {
 			WebMvcLinkBuilder activationlink =  linkTo(methodOn(this.getClass()).activationLink(regUser.getCompanyId().getCompanyId(),regUser.getUserId()));
-			try {
-				mailing.sendEmail(regUser.getEmail(),"Account activation link.!",activationlink.toString());
+			try { 
+				String body = "Please click on the below link to activate your account in outreach fox application.<br>"+activationlink.toString();
+				mailing.sendEmail(regUser.getEmail(),"Account activation link.!",body);
 	        } catch (SendFailedException sendFailedException) {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Activation link email unsuccessfull.!");
+	        	String comResponse = companyService.deleteCompanyByID(regUser.getCompanyId().getCompanyId());
+	        	String userResponse  = userService.deleteUserByID(regUser.getUserId());
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Company registration failed due to mail id.!");
 	        }
 			JSONObject response = new JSONObject();
 			response.appendField("message", "Account activation link sent to your registered email, please check.!");
@@ -140,11 +147,33 @@ public class CompanyController {
 	@GetMapping("/company/activate/{companyId}/{userId}")
 	public ResponseEntity<?> activationLink(@PathVariable String companyId,@PathVariable String userId){
 		Company companyDetails =  companyService.activateCompany(companyId,userId);
-		if(companyDetails.getCompanyId() != null) {
-			return new ResponseEntity<>("Activated successfully.!", HttpStatus.OK);
+		if(companyDetails != null) {
+			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activated successfully.! </span><br><span>Please <button><a href="+userLoginPath+">Log in</a></button></span></body></html>";
+			return new ResponseEntity<>(htmlPage, HttpStatus.OK);
 		}
 		else {
-			throw new DetailsNotFound("Company details not found");
+			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activation failed.! Please contact admin </span><br></body></html>";
+			//throw new DetailsNotFound("Company details not found");
+			return new ResponseEntity<>(htmlPage, HttpStatus.BAD_REQUEST);
+		}
+	}
+	@GetMapping("/company/send/link/{userId}")
+	public ResponseEntity<?> sendActivationLink(@PathVariable String userId) throws Exception{
+		User regUser =  userService.getUserByID(userId);
+		if(regUser.getUserId() != null) {
+			WebMvcLinkBuilder activationlink =  linkTo(methodOn(this.getClass()).activationLink(regUser.getCompanyId().getCompanyId(),regUser.getUserId()));
+			try {
+				String body = "Please click on the below link to activate your account in outreach fox application.<br>"+activationlink.toString();
+				mailing.sendEmail(regUser.getEmail(),"Account activation link.!",body);
+	        } catch (SendFailedException sendFailedException) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Activation link email unsuccessfull.!");
+	        }
+			JSONObject response = new JSONObject();
+			response.appendField("message", "Account activation link sent to your registered email, please check.!");
+			response.appendField("data", regUser);
+			return new ResponseEntity<>(response, HttpStatus.CREATED);
+		}else {
+			throw new BadRequestException("Details not found.!");
 		}
 	}
 	

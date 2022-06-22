@@ -15,10 +15,10 @@ import com.companyservice.companyservice.entity.User;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, String>,PagingAndSortingRepository<User, String>{
-	@Query(value = "SELECT * FROM USERS WHERE EMAIL = ?1", nativeQuery = true)
+	//@Query(value = "SELECT * FROM users WHERE EMAIL = ?1", nativeQuery = true)
 	User findByEmail(String email);
 	
-	@Query(value = "SELECT * FROM USERS WHERE COMPANY_ID = ?1", nativeQuery = true)
+	//@Query(value = "SELECT * FROM USERS WHERE COMPANY_ID = ?1", nativeQuery = true)
 	List<User> findByCompanyId(String companyId);
 	Page<User> findByCompanyId(Company companyId,Pageable paging);
 	User getById(String id);

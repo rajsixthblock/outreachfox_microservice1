@@ -3,6 +3,8 @@ package com.companyservice.companyservice.repository;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+
+import com.companyservice.companyservice.entity.Campaign;
 import com.companyservice.companyservice.entity.Company;
 import com.companyservice.companyservice.entity.MailStatus;
 
@@ -10,7 +12,6 @@ import com.companyservice.companyservice.entity.MailStatus;
 public interface MailStatusRepository extends CrudRepository<MailStatus, String>{
 	
 	MailStatus getById(String id);
-
-	Optional<MailStatus> findByCampaginId(Company company);
+	Optional<MailStatus> findByCampaignId(Campaign campaign);
 
 }

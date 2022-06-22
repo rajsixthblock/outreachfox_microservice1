@@ -80,11 +80,17 @@ public class UserService {
 					JSONObject jsonObject = new JSONObject();
 					jsonObject.put("userDetails",userDetails);
 					jsonObject.put("token",token);
+					if(userDetails.getCompanyId().getSubscriptionId() != null) {
+						jsonObject.put("subscription",true);
+					}else {
+						jsonObject.put("subscription",false);
+					}
 					return jsonObject;
 				}else {
 					WebMvcLinkBuilder activationlink =  linkTo(methodOn(controllerClass.getClass()).activationUser(userDetails.getCompanyId().getCompanyId(),userDetails.getUserId()));
 					try {
-						mailing.sendEmail(userDetails.getEmail(),"Account activation link.!",activationlink.toString());
+						String body = "Please click on the below link to activate your account in outreach fox application.<br>"+activationlink.toString();
+						mailing.sendEmail(userDetails.getEmail(),"Account activation link.!",body);
 			        } catch (SendFailedException sendFailedException) {
 			        	throw new BadRequestException("Activation link email unsuccessfull.!");
 			        }

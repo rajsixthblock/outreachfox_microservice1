@@ -62,8 +62,8 @@ public class SubscriptionController {
 	
 	@GetMapping("/plan/getByID/{id}")
 	public ResponseEntity<?> getByPlanID(@PathVariable String id) throws Exception {
-		Optional<Subscription> subscriptionDetails =  subscriptionService.getById(id);
-		if(!subscriptionDetails.isEmpty()) {
+		Subscription subscriptionDetails =  subscriptionService.getById(id);
+		if(subscriptionDetails != null) {
 			return new ResponseEntity<>(subscriptionDetails, HttpStatus.OK);
 		}
 		else {

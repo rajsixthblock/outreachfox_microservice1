@@ -54,9 +54,9 @@ public class SubscriptionService {
 		return null;
 	}
 	
-	public Optional<Subscription> getById(String id) throws Exception {
+	public Subscription getById(String id) throws Exception {
 		try {
-			Optional<Subscription> subscription = subscriptionRepository.findById(id);
+			Subscription subscription = subscriptionRepository.getById(id);
 			return subscription;
 		}catch(Exception e){
 			if(e instanceof SQLException) {

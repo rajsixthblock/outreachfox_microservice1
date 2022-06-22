@@ -30,9 +30,12 @@ public class CompanyService {
 	private SecurityConfig securityConfig;
 	@Autowired
 	private UserRepository userRepository;
+	
 	public User companyRegistration(Company payload) throws Exception {
+		
 		Company regCompany = new Company();
 		User user = new User();
+		
 		if(companyRepository.existsByemail(payload.getEmail())) {
 			throw new BadRequestException("Company already exist with this email");
 		}
@@ -44,7 +47,7 @@ public class CompanyService {
 				user.setCompanyId(regCompany);
 				user.setEmail(payload.getEmail());
 				user.setPassword(payload.getPassword());
-				user.setName("Admin");
+				user.setName(payload.getName());
 				user.setPhone(payload.getPhone());
 				user.setStatus(false);
 				user = userRepository.save(user);
@@ -168,7 +171,7 @@ public class CompanyService {
 	public Company activateCompany(String companyId,String userId) {
 		Company companyDetails = companyRepository.getById(companyId);
 		if(companyDetails.getCompanyId() == null) {
-			throw new DetailsNotFound("Company details not found.!");
+			return null;
 		}else {
 			companyDetails.setStatus(true);
 			companyDetails = companyRepository.save(companyDetails);

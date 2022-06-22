@@ -128,9 +128,9 @@ public class MailStatusService {
 
 	public Optional<MailStatus> getLeadDetailsByCampaignId(String campaignId) throws Exception {
 		try {
-			Company company = new Company();
-			company.setCompanyId(campaignId);
-			Optional<MailStatus> MailStatusDetails = mailStatusRepository.findByCampaginId(company);
+			Campaign campaign = new Campaign();
+			campaign.setCampaignId(campaignId);
+			Optional<MailStatus> MailStatusDetails = mailStatusRepository.findByCampaignId(campaign);
 			return MailStatusDetails;
 		}
 		catch(Exception e){

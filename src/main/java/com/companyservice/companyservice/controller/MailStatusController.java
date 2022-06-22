@@ -36,7 +36,7 @@ public class MailStatusController {
 			payload.setAudienceId(audience);
 			
 			Campaign campaign = new Campaign();
-			campaign.setCampaginId(campaignId);
+			campaign.setCampaignId(campaignId);
 			payload.setCampaignId(campaign);
 		}
 		MailStatus newMailStatus = mailStatusService.saveMailStatus(payload);
@@ -95,7 +95,7 @@ public class MailStatusController {
 			payload.setAudienceId(audience);
 			
 			Campaign campaign = new Campaign();
-			campaign.setCampaginId(campaignId);
+			campaign.setCampaignId(campaignId);
 			payload.setCampaignId(campaign);
 		}
 		MailStatus newMailStatus =  mailStatusService.updateMailStatus(mailStatusId, payload);

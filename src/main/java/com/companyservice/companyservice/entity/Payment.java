@@ -9,9 +9,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Table
 @Entity
@@ -26,11 +31,13 @@ public class Payment {
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
 	private Company companyId;
 	
 	@JoinColumn(name = "id", referencedColumnName = "id")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"status","createdAt","updatedAt"})
 	private Subscription subscriptionId;
 	
 	@NotBlank(message = "Transaction Id cannot be blank")
@@ -52,9 +59,37 @@ public class Payment {
 	@Column(name = "`status`")
 	private boolean status;
 	
-
-	 /**setters and getters */
+	@Column(name = "`createdAt`")
+	@CreationTimestamp
+	private Date createdAt;
+	
+	@Column(name = "updatedAt")
+	@UpdateTimestamp
+	private Date updatedAt;
+	
+	/**setters and getters */
 	 
+	 public Date getCreatedAt() {
+		return createdAt;
+	}
+
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+
+
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+
+	
 	public String getPaymentId() {
 		return paymentId;
 	}
@@ -134,14 +169,22 @@ public class Payment {
 		this.status = status;
 	}
 	
-	/** constructor with all arguments */
 	
-	public Payment(String paymentId, @NotBlank(message = "Company Id cannot be blank") Company companyId,
-			@NotBlank(message = "Subscription Id cannot be blank") Subscription subscriptionId,
+	
+	
+
+	/** constructor with no arguments */
+	
+	public Payment() {
+		super();
+	}
+
+	/** constructor with all arguments */
+	public Payment(String paymentId, Company companyId, Subscription subscriptionId,
 			@NotBlank(message = "Transaction Id cannot be blank") String transactionId,
 			@NotBlank(message = "Amount cannot be blank") String amount,
-			@NotBlank(message = "Payment Mode cannot be blank") String paymentMode,
-			@NotBlank(message = "Paid Date cannot be blank") Date paidDate, boolean status) {
+			@NotBlank(message = "Payment Mode cannot be blank") String paymentMode, Date paidDate, boolean status,
+			Date createdAt, Date updatedAt) {
 		super();
 		this.paymentId = paymentId;
 		this.companyId = companyId;
@@ -151,23 +194,17 @@ public class Payment {
 		this.paymentMode = paymentMode;
 		this.paidDate = paidDate;
 		this.status = status;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 	}
 
-
-	/** constructor with no arguments */
-	
-	public Payment() {
-		super();
-	}
-
-
-	/** To String method */
 
 	@Override
 	public String toString() {
 		return "Payment [paymentId=" + paymentId + ", companyId=" + companyId + ", subscriptionId=" + subscriptionId
 				+ ", transactionId=" + transactionId + ", amount=" + amount + ", paymentMode=" + paymentMode
-				+ ", paidDate=" + paidDate + ", status=" + status + "]";
+				+ ", paidDate=" + paidDate + ", status=" + status + ", createdAt=" + createdAt + ", updatedAt="
+				+ updatedAt + "]";
 	}
 	
 }

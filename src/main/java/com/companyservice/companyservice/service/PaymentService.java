@@ -16,6 +16,7 @@ import com.companyservice.companyservice.entity.Payment;
 import com.companyservice.companyservice.entity.Subscription;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
+import com.companyservice.companyservice.repository.CompanyRepository;
 import com.companyservice.companyservice.repository.PaymentRepository;
 
 
@@ -23,26 +24,30 @@ import com.companyservice.companyservice.repository.PaymentRepository;
 public class PaymentService {
 	@Autowired
 	private PaymentRepository paymentRepository;
-	
+	@Autowired
+	private CompanyRepository companyRepository;
+	@Autowired
+	private SubscriptionService subscriptionService;
 	public Payment savePayment(String companyId,String subscriptionId, Payment payload) throws Exception {
-		
-		Payment newPayment= new Payment();
-		
 		Company company = new Company();
-		company.setCompanyId(companyId);
-		payload.setCompanyId(company);
-		
+		Payment newPayment= new Payment();
 		Subscription subscription = new Subscription();
-		subscription.setId(subscriptionId);
-		payload.setSubscriptionId(subscription);
-		
-		try {
-			newPayment = paymentRepository.save(payload);
-		}catch(Exception e) {
-			if(e instanceof DataIntegrityViolationException) {
-				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+		company = companyRepository.getById(companyId);
+		if(company.getCompanyId() != null) {
+			payload.setCompanyId(company);
+			subscription = subscriptionService.getById(subscriptionId);
+			payload.setSubscriptionId(subscription);
+			company.setSubscriptionId(subscription);
+			try {
+				newPayment = paymentRepository.save(payload);
+				company = companyRepository.save(company);
+			}catch(Exception e) {
+				if(e instanceof DataIntegrityViolationException) {
+					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+				}
 			}
 		}
+		
 		return newPayment;
 	}
 	

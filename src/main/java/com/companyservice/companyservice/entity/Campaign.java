@@ -17,6 +17,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table
 @Entity
 public class Campaign {
@@ -25,11 +27,13 @@ public class Campaign {
 	@GenericGenerator(name = "uuid", strategy = "uuid")
 	@Column(columnDefinition = "CHAR(32)",unique=true)
 	@Id
-	private String campaginId;
+	private String campaignId;
+	
 	
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
 	private Company companyId;
 	
 	@NotBlank(message = "name can't be blank")
@@ -52,11 +56,10 @@ public class Campaign {
 	private Date scheduleDate ;
 	
 	@Column(name = "`followUp`")
-	private boolean followUp;
+	private boolean followUp = false;
 	
 	@Column(name = "`FollowupAfterDays`")
-	private int FollowupAfterDays;
-	
+	private int FollowupAfterDays = 0;
 	
 	@Column(name = "`status`")
 	private boolean status;
@@ -68,16 +71,25 @@ public class Campaign {
 	@Column(name = "updatedAt")
 	@UpdateTimestamp
 	private Date updatedAt;
-
+	
+	
 	/**setters and getters */
 	
 	
-	public String getCampaginId() {
-		return campaginId;
+	public String getCampaignId() {
+		return campaignId;
 	}
 
-	public void setCampaginId(String campaginId) {
-		this.campaginId = campaginId;
+	public void setCampaignId(String campaignId) {
+		this.campaignId = campaignId;
+	}
+
+	public Company getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(Company companyId) {
+		this.companyId = companyId;
 	}
 
 	public String getName() {
@@ -96,22 +108,6 @@ public class Campaign {
 		this.title = title;
 	}
 
-	public boolean isFollowUp() {
-		return followUp;
-	}
-
-	public void setFollowUp(boolean followUp) {
-		this.followUp = followUp;
-	}
-
-	public int getFollowupAfterDays() {
-		return FollowupAfterDays;
-	}
-
-	public void setFollowupAfterDays(int followupAfterDays) {
-		FollowupAfterDays = followupAfterDays;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -119,7 +115,7 @@ public class Campaign {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
 	public String getDelivery() {
 		return delivery;
 	}
@@ -134,6 +130,22 @@ public class Campaign {
 
 	public void setScheduleDate(Date scheduleDate) {
 		this.scheduleDate = scheduleDate;
+	}
+
+	public boolean isFollowUp() {
+		return followUp;
+	}
+
+	public void setFollowUp(boolean followUp) {
+		this.followUp = followUp;
+	}
+
+	public int getFollowupAfterDays() {
+		return FollowupAfterDays;
+	}
+
+	public void setFollowupAfterDays(int followupAfterDays) {
+		FollowupAfterDays = followupAfterDays;
 	}
 
 	public boolean isStatus() {
@@ -160,23 +172,13 @@ public class Campaign {
 		this.updatedAt = updatedAt;
 	}
 
-	public Company getCompanyId() {
-		return companyId;
-	}
-
-	public void setCompanyId(Company companyId) {
-		this.companyId = companyId;
-	}
-
-	/** constructor with all arguments */
-	
-	public Campaign(String campaginId, Company companyId, @NotBlank(message = "name can't be blank") String name,
+	public Campaign(String campaignId, Company companyId, @NotBlank(message = "name can't be blank") String name,
 			@NotBlank(message = "title can't be blank") String title,
 			@NotBlank(message = "email can't be blank") @Email(message = "invalid email") String email, String delivery,
 			Date scheduleDate, boolean followUp, int followupAfterDays, boolean status, Date createdAt,
 			Date updatedAt) {
 		super();
-		this.campaginId = campaginId;
+		this.campaignId = campaignId;
 		this.companyId = companyId;
 		this.name = name;
 		this.title = title;
@@ -184,30 +186,27 @@ public class Campaign {
 		this.delivery = delivery;
 		this.scheduleDate = scheduleDate;
 		this.followUp = followUp;
-		this.FollowupAfterDays = followupAfterDays;
+		FollowupAfterDays = followupAfterDays;
 		this.status = status;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
 
-	/** constructor with no arguments */
-	
 	public Campaign() {
 		super();
 	}
-	
-	
 
-	/** To String method */
-	
 	@Override
 	public String toString() {
-		return "Campaign [campaginId=" + campaginId + ", companyId=" + companyId + ", name=" + name + ", title=" + title
+		return "Campaign [campaignId=" + campaignId + ", companyId=" + companyId + ", name=" + name + ", title=" + title
 				+ ", email=" + email + ", delivery=" + delivery + ", scheduleDate=" + scheduleDate + ", followUp="
 				+ followUp + ", FollowupAfterDays=" + FollowupAfterDays + ", status=" + status + ", createdAt="
 				+ createdAt + ", updatedAt=" + updatedAt + "]";
 	}
 
+	
+	
+	
 	
 	
 	

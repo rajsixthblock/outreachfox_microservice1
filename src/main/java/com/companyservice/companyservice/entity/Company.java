@@ -5,12 +5,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Table
 @Entity
@@ -24,6 +31,10 @@ public class Company {
 	
 	@Column(name = "`name`",columnDefinition = "VARCHAR(100)")
 	private String name;
+	
+	@NotBlank(message = "companyName can't be blank")
+	@Column(name = "`companyName`",columnDefinition = "VARCHAR(100)")
+	private String companyName;
 	
 	@Column(name = "`phone`",columnDefinition = "VARCHAR(15)",unique=true)
 	private long phone;
@@ -42,6 +53,12 @@ public class Company {
 	
 	@Column(name = "`address`", columnDefinition = "VARCHAR(150)")
 	private String address;
+	
+	@ManyToOne
+	@JoinColumn(name = "subscriptionId", referencedColumnName = "id")
+	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"status","createdAt","updatedAt"})
+	private Subscription subscriptionId;
 	
 	@Column(name = "`createdAt`")
 	@CreationTimestamp
@@ -67,6 +84,22 @@ public class Company {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public Subscription getSubscriptionId() {
+		return subscriptionId;
+	}
+
+	public void setSubscriptionId(Subscription subscriptionId) {
+		this.subscriptionId = subscriptionId;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	public long getPhone() {
@@ -125,24 +158,6 @@ public class Company {
 	public void setUpdatedAt(Date updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-
-	/** constructor with all arguments */
-	
-	public Company(String companyId, String name, long phone,
-			@NotBlank(message = "email can't be blank") @Email(message = "invalid email") String email,
-			@NotBlank(message = "password can't be blank") String password, boolean status, String address,
-			Date createdAt, Date updatedAt) {
-		super();
-		this.companyId = companyId;
-		this.name = name;
-		this.phone = phone;
-		this.email = email;
-		this.password = password;
-		this.status = status;
-		this.address = address;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-	}
 	
 	/** constructor with no arguments */
 	
@@ -150,13 +165,33 @@ public class Company {
 		super();
 	}
 	
-
-	/** To String method */
+	/** constructor with all arguments */
+	public Company(String companyId, String name, @NotBlank(message = "companyName can't be blank") String companyName,
+			long phone, @NotBlank(message = "email can't be blank") @Email(message = "invalid email") String email,
+			@NotBlank(message = "password can't be blank") String password, boolean status, String address,
+			Subscription subscriptionId, Date createdAt, Date updatedAt) {
+		super();
+		this.companyId = companyId;
+		this.name = name;
+		this.companyName = companyName;
+		this.phone = phone;
+		this.email = email;
+		this.password = password;
+		this.status = status;
+		this.address = address;
+		this.subscriptionId = subscriptionId;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
 	
 	@Override
 	public String toString() {
-		return "Company [companyId=" + companyId + ", name=" + name + ", phone=" + phone + ", email=" + email
-				+ ", password=" + password + ", status=" + status + ", address=" + address + ", createdAt=" + createdAt
-				+ ", updatedAt=" + updatedAt + "]";
+		return "Company [companyId=" + companyId + ", name=" + name + ", companyName=" + companyName + ", phone="
+				+ phone + ", email=" + email + ", password=" + password + ", status=" + status + ", address=" + address
+				+ ", subscriptionId=" + subscriptionId + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
+
+	
+
+	
 }

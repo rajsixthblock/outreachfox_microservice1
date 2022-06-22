@@ -18,6 +18,8 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Table(name="users")
 @Entity
@@ -32,6 +34,7 @@ public class User {
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
 	private Company companyId;
 	
 	@Column(name = "`name`",columnDefinition = "VARCHAR(100)")

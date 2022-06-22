@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
@@ -26,10 +27,13 @@ public class Subscription {
 	@NotBlank(message = "Please assign a name to this plan")
 	@Column(name = "`planName`",columnDefinition = "VARCHAR(100)",unique=true)
 	private String planName;
+	
 	@Column(name = "`amount`",columnDefinition = "VARCHAR(100)")
 	private double amount;
+	
 	@Column(name = "`currencyType`",columnDefinition = "VARCHAR(25)")
 	private String currencyType;
+	
 	@Column(name = "`emailsLimit`",columnDefinition = "VARCHAR(100)")
 	private long emailsLimit;
 	

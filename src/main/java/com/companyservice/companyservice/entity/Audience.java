@@ -1,12 +1,14 @@
 package com.companyservice.companyservice.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -17,6 +19,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Table
 @Entity
@@ -31,12 +35,14 @@ public class Audience {
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
 	private Company companyId;
 	
-	@JoinColumn(name = "campaginId", referencedColumnName = "campaginId")
-	@ManyToOne
+	@JoinColumn(name = "campaignId", referencedColumnName = "campaignId")
+	@ManyToMany
 	@NotFound(action = NotFoundAction.IGNORE)
-	private Campaign campaginId;
+	@JsonIgnoreProperties({"companyId","status","createdAt","updatedAt"})
+	private List<Campaign> campaignId;
 	
 	@Column(name = "`name`",columnDefinition = "VARCHAR(100)")
 	private String name;
@@ -56,8 +62,8 @@ public class Audience {
 	private boolean isLead = false;
 
 	@Column(name = "`status`")
-	private boolean status;
-	
+	private boolean status =true;
+
 	@Column(name = "`createdAt`")
 	@CreationTimestamp
 	private Date createdAt;
@@ -83,13 +89,13 @@ public class Audience {
 	public void setCompanyId(Company companyId) {
 		this.companyId = companyId;
 	}
-
-	public Campaign getCampaginId() {
-		return campaginId;
+	
+	public List<Campaign> getCampaignId() {
+		return campaignId;
 	}
 
-	public void setCampaginId(Campaign campaginId) {
-		this.campaginId = campaginId;
+	public void setCampaignId(List<Campaign> campaignId) {
+		this.campaignId = campaignId;
 	}
 
 	public String getName() {
@@ -156,15 +162,20 @@ public class Audience {
 		this.updatedAt = updatedAt;
 	}
 	
-	/** constructor with all arguments */
+	/** constructor with no arguments */
 	
-	public Audience(String id, Company companyId, Campaign campaginId, String name, long phone,
+	public Audience() {
+		super();
+	}
+	
+	/** constructor with all arguments */
+	public Audience(String id, Company companyId, List<Campaign> campaignId, String name, long phone,
 			@NotBlank(message = "email can't be blank") @Email(message = "invalid email") String email, String address,
 			boolean isLead, boolean status, Date createdAt, Date updatedAt) {
 		super();
 		this.id = id;
 		this.companyId = companyId;
-		this.campaginId = campaginId;
+		this.campaignId = campaignId;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -174,21 +185,22 @@ public class Audience {
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
-	
-	/** constructor with no arguments */
-	
-	public Audience() {
+	public Audience(String id, Company companyId, List<Campaign> campaginId, String name, long phone,
+			@NotBlank(message = "email can't be blank") @Email(message = "invalid email") String email,
+			String address) {
 		super();
+		this.id = id;
+		this.companyId = companyId;
+		this.campaignId = campaignId;
+		this.name = name;
+		this.phone = phone;
+		this.email = email;
+		this.address = address;
 	}
-	
-	/** To String method */
 	@Override
 	public String toString() {
-		return "Audience [id=" + id + ", companyId=" + companyId + ", campaginId=" + campaginId + ", name=" + name
+		return "Audience [id=" + id + ", companyId=" + companyId + ", campaignId=" + campaignId + ", name=" + name
 				+ ", phone=" + phone + ", email=" + email + ", address=" + address + ", isLead=" + isLead + ", status="
 				+ status + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
-	
-	
-	
 }

@@ -12,6 +12,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table
 public class MailStatus {
@@ -25,12 +27,14 @@ public class MailStatus {
 	@JoinColumn(name = "id", referencedColumnName = "id")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"campaignId","address","isLead","status","createdAt","updatedAt"}) 
 	private Audience audienceId;
 	
-	@JoinColumn(name = "campaginId", referencedColumnName = "campaginId")
+	@JoinColumn(name = "campaignId", referencedColumnName = "campaignId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
-	private Campaign campaginId;
+	@JsonIgnoreProperties({"companyId","status","createdAt","updatedAt"})
+	private Campaign campaignId;
 	
 	@Column(name = "`sent`")
 	private Boolean sent;
@@ -133,11 +137,11 @@ public class MailStatus {
 	}
 	
 	public Campaign getCampaignId() {
-		return campaginId;
+		return campaignId;
 	}
 
-	public void setCampaignId(Campaign campaginId) {
-		this.campaginId = campaginId;
+	public void setCampaignId(Campaign campaignId) {
+		this.campaignId = campaignId;
 	}
 
 	public Date getSentDate() {
@@ -150,12 +154,12 @@ public class MailStatus {
 
 	/** constructor with all arguments */
 	
-	public MailStatus(String mailStatusId, Audience audienceId, Campaign compaginId, Boolean sent, Boolean read, Boolean bounced,
+	public MailStatus(String mailStatusId, Audience audienceId, Campaign campaignId, Boolean sent, Boolean read, Boolean bounced,
 			Boolean replied, Boolean pending, Boolean unsubscribed, Boolean error, Date sentDate) {
 		super();
 		this.mailStatusId = mailStatusId;
 		this.audienceId = audienceId;
-		this.campaginId = compaginId;
+		this.campaignId = campaignId;
 		this.sent = sent;
 		this.read = read;
 		this.bounced = bounced;
@@ -177,7 +181,7 @@ public class MailStatus {
 
 	@Override
 	public String toString() {
-		return "MailStatus [mailStatusId=" + mailStatusId + ", audienceId=" + audienceId + ", campaginId=" + campaginId + ", sent=" + sent
+		return "MailStatus [mailStatusId=" + mailStatusId + ", audienceId=" + audienceId + ", campaignId=" + campaignId + ", sent=" + sent
 				+ ", read=" + read + ", bounced=" + bounced + ", replied=" + replied + ", pending=" + pending
 				+ ", unsubscribed=" + unsubscribed + ", error=" + error + ", sentDate=" + sentDate + "]";
 	}

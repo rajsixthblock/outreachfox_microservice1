@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,7 +35,8 @@ import net.minidev.json.JSONObject;
 @RestController
 @Logging
 public class UserController {
-
+	@Value("${login-link}")
+	private String userLoginPath;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -123,14 +125,9 @@ public class UserController {
 	
 	@Authorization
 	@DeleteMapping("/user/delete/{id}")
-	public ResponseEntity<?> deleteUser(@PathVariable String id) throws Exception {
-		//String companyId = userRepository.getById(id).getCompanyId().getCompanyId();		
+	public ResponseEntity<?> deleteUser(@PathVariable String id) throws Exception {	
 		String response =  userService.deleteUserByID(id);
 		if(response != "") {
-			//List<User> userDetails = (List<User>) userRepository.findByCompanyId(companyId);
-			//JSONObject result = new JSONObject();
-			//result.appendField("message", response);
-			//result.appendField("data", userDetails);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 		else {
@@ -138,10 +135,11 @@ public class UserController {
 		}
 		
 	}
-	@Authorization
+	//@Authorization
 	@PutMapping("/user/password/update/{id}")
 	public ResponseEntity<?> updatePassword(@PathVariable String id, @RequestBody Password payload) throws Exception {
 		User userDetails =  userService.updatePassword(id, payload);
+		System.out.println(" Controller");
 		if(userDetails != null) {
 			return new ResponseEntity<>("Password updated successfully.!", HttpStatus.OK);
 		}
@@ -153,10 +151,15 @@ public class UserController {
 	public ResponseEntity<?> activationUser(@PathVariable String companyId,@PathVariable String userId){
 		Company companyDetails =  companyService.activateCompany(companyId,userId);
 		if(companyDetails.getCompanyId() != null) {
-			return new ResponseEntity<>("Activated successfully.!", HttpStatus.OK);
+			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activated successfully.! </span><br><span>Please <button><a href="+userLoginPath+">Log in</a></button></span></body></html>";
+			return new ResponseEntity<>(htmlPage, HttpStatus.OK);
 		}
 		else {
-			throw new DetailsNotFound("Company details not found");
+			//throw new DetailsNotFound("Company details not found");
+			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activation failed.! Please contact admin </span><br></body></html>";
+			//throw new DetailsNotFound("Company details not found");
+			return new ResponseEntity<>(htmlPage, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
 }

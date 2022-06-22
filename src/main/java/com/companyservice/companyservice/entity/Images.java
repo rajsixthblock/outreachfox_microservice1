@@ -17,6 +17,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name="images")
 @Entity
 public class Images {
@@ -29,11 +31,13 @@ public class Images {
 	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
 	private Company companyId;
 	
 	@JoinColumn(name = "userId", referencedColumnName = "userId")
 	@ManyToOne
 	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"companyId","password","status","createdAt","updatedAt"}) 
 	private User userId;
 	
 	@NotBlank(message = "imageName can't be blank")
