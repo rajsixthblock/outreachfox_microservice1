@@ -25,7 +25,7 @@ public class Subscription {
 	private String id;
 	
 	@NotBlank(message = "Please assign a name to this plan")
-	@Column(name = "`planName`",columnDefinition = "VARCHAR(100)",unique=true)
+	@Column(name = "`planName`",columnDefinition = "VARCHAR(100)")
 	private String planName;
 	
 	@Column(name = "`amount`",columnDefinition = "VARCHAR(100)")
@@ -36,6 +36,9 @@ public class Subscription {
 	
 	@Column(name = "`emailsLimit`",columnDefinition = "VARCHAR(100)")
 	private long emailsLimit;
+	
+	@Column(name = "`planType`",columnDefinition = "VARCHAR(100)")
+	private String planType;
 	
 	@Column(name = "`status`")
 	private boolean status;
@@ -92,24 +95,16 @@ public class Subscription {
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
+	public String getPlanType() {
+		return planType;
+	}
+	public void setPlanType(String planType) {
+		this.planType = planType;
+	}
 	public Date getUpdatedAt() {
 		return updatedAt;
 	}
 	public void setUpdatedAt(Date updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	/** constructor with all arguments */
-	
-	public Subscription(String id, @NotBlank(message = "Please assign a name to this plan") String planName,
-			double amount, String currencyType, long emailsLimit, boolean status, Date createdAt, Date updatedAt) {
-		super();
-		this.id = id;
-		this.planName = planName;
-		this.amount = amount;
-		this.currencyType = currencyType;
-		this.emailsLimit = emailsLimit;
-		this.status = status;
-		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
 	
@@ -119,14 +114,31 @@ public class Subscription {
 		super();
 	}
 	
-	/** To String method */
+	/** constructor with all arguments */
+	public Subscription(String id, @NotBlank(message = "Please assign a name to this plan") String planName,
+			double amount, String currencyType, long emailsLimit, String planType, boolean status, Date createdAt,
+			Date updatedAt) {
+		super();
+		this.id = id;
+		this.planName = planName;
+		this.amount = amount;
+		this.currencyType = currencyType;
+		this.emailsLimit = emailsLimit;
+		this.planType = planType;
+		this.status = status;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
 	
+	/** To String method */
 	@Override
 	public String toString() {
 		return "Subscription [id=" + id + ", planName=" + planName + ", amount=" + amount + ", currencyType="
-				+ currencyType + ", emailsLimit=" + emailsLimit + ", status=" + status + ", createdAt=" + createdAt
-				+ ", updatedAt=" + updatedAt + "]";
+				+ currencyType + ", emailsLimit=" + emailsLimit + ", planType=" + planType + ", status=" + status
+				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
+	
+	
 	
 	
 	

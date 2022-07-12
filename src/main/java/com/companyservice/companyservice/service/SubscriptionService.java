@@ -26,8 +26,8 @@ public class SubscriptionService {
 	private SubscriptionRepository subscriptionRepository;
 	
 	public Subscription create(Subscription payload) throws Exception {
-		if(subscriptionRepository.existsByPlanName(payload.getPlanName())) {
-			throw new BadRequestException("Plan already exist with this Name");
+		if(subscriptionRepository.existsByPlanNameAndPlanType(payload.getPlanName(), payload.getPlanType())) {
+			throw new BadRequestException("Plan already exist with this Name for "+ payload.getPlanType());
 		}else {
 			try {
 				Subscription subscription = subscriptionRepository.save(payload);
@@ -41,11 +41,23 @@ public class SubscriptionService {
 		return null;
 	}
 	
-	public List<Subscription> getAll(int pageNo, int pageSize) throws Exception{
+	public Page<Subscription> getAll(int pageNo, int pageSize) throws Exception{
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Subscription> subscriptions =  subscriptionRepository.findAll(paging);
-			return subscriptions.toList();
+			return subscriptions;
+		}catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	public Page<Subscription> getAllByType(int pageNo, int pageSize,String planType) throws Exception{
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		try {
+			Page<Subscription> subscriptions =  subscriptionRepository.getByPlanType(planType,paging);
+			return subscriptions;
 		}catch(Exception e){
 			if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
@@ -56,7 +68,7 @@ public class SubscriptionService {
 	
 	public Subscription getById(String id) throws Exception {
 		try {
-			Subscription subscription = subscriptionRepository.getById(id);
+			Subscription subscription = subscriptionRepository.findById(id).orElse(null);
 			return subscription;
 		}catch(Exception e){
 			if(e instanceof SQLException) {
@@ -68,12 +80,12 @@ public class SubscriptionService {
 	public Subscription updateSubscription(String id, Subscription payload) throws Exception {
 		if(subscriptionRepository.existsById(id)) {
 			Subscription subscription = subscriptionRepository.getById(id);
-			if(subscription.getPlanName().equals(payload.getPlanName())){
+			if(subscription.getPlanName().equals(payload.getPlanName()) && subscription.getPlanType().equals(payload.getPlanType()) ){
 				subscription = setsubscriptionData(payload, subscription);
 			} 
 			else {
-				if(subscriptionRepository.existsByPlanName(payload.getPlanName())) {
-					throw new BadRequestException("Plan already exist with this Name");
+				if(subscriptionRepository.existsByPlanNameAndPlanType(payload.getPlanName(), payload.getPlanType())) {
+					throw new BadRequestException("Plan already exist with this Name for "+payload.getPlanType());
 				}else {
 					subscription = setsubscriptionData(payload, subscription);
 				}

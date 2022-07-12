@@ -1,11 +1,14 @@
 package com.companyservice.companyservice.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import com.companyservice.companyservice.entity.Company;
+import com.companyservice.companyservice.entity.Payment;
 import com.companyservice.companyservice.entity.Subscription;
 
 
@@ -18,4 +21,6 @@ public interface SubscriptionRepository extends CrudRepository<Subscription, Str
 	Subscription getById(String id);
 	
 	boolean existsByPlanName(String planName);
+	boolean existsByPlanNameAndPlanType(String planName,String planType);
+	Page<Subscription> getByPlanType(String planType,Pageable paging);
 }

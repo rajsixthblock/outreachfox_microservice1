@@ -30,7 +30,7 @@ public class MailService {
 	     helper.setText(body, true);
 	     
 	     sender.send(msg);
-	     System.out.println("\n Activation link sent successfully to registered mail id.! \n");
+	     System.out.println("\n "+subject+" sent successfully to your registered mail id.! \n");
 	}
 	
 //	private JavaMailSenderImpl sender = new JavaMailSenderImpl();

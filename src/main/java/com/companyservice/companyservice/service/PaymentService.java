@@ -1,6 +1,10 @@
 package com.companyservice.companyservice.service;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,8 @@ import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.repository.CompanyRepository;
 import com.companyservice.companyservice.repository.PaymentRepository;
+
+import net.minidev.json.JSONObject;
 
 
 @Service
@@ -38,6 +44,8 @@ public class PaymentService {
 			subscription = subscriptionService.getById(subscriptionId);
 			payload.setSubscriptionId(subscription);
 			company.setSubscriptionId(subscription);
+			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	        //Date onedayorder = sdf.parse(payload.getPaidDate().toGMTString());
 			try {
 				newPayment = paymentRepository.save(payload);
 				company = companyRepository.save(company);
@@ -51,11 +59,11 @@ public class PaymentService {
 		return newPayment;
 	}
 	
-	public List<Payment> getPaymentDetails(int pageNo,int pageSize) throws Exception {
+	public Page<Payment> getPaymentDetails(int pageNo,int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Payment> paymentDetails =  paymentRepository.findAll(paging);
-			return paymentDetails.toList();
+			return paymentDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -65,13 +73,13 @@ public class PaymentService {
 		return null;
 	}
 	
-	public List<Payment> getPaymentDetails(int pageNo,int pageSize,String companyId) throws Exception {
+	public Page<Payment> getPaymentDetails(int pageNo,int pageSize,String companyId) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		Company company = new Company();
 		company.setCompanyId(companyId);
 		try {
 			Page<Payment> paymentDetails =   paymentRepository.getByCompanyId(company,paging);
-			return paymentDetails.toList();
+			return paymentDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -81,9 +89,9 @@ public class PaymentService {
 		return null;
 	}
 	
-	public Optional<Payment> getPaymentID(String id) throws Exception {
+	public Payment getPaymentID(String id) throws Exception {
 		try {
-			Optional<Payment> paymentDetails = paymentRepository.findById(id);
+			Payment paymentDetails = paymentRepository.findById(id).orElse(null);
 			return paymentDetails;
 		}
 		catch(Exception e){
@@ -140,15 +148,15 @@ public class PaymentService {
 		}else if(!payload.isStatus()) {
 			PaymentDetails.setStatus(payload.isStatus());
 		}
-		if(payload.getAmount() != null) {
+		if(payload.getAmount() != 0 && payload.getAmount() != 0.0) {
 			PaymentDetails.setAmount(payload.getAmount());
 		}
 		if(payload.getPaymentMode() != null) {
 			PaymentDetails.setPaymentMode(payload.getPaymentMode());
 		}
-		if(payload.getPaidDate() != null) {
-			PaymentDetails.setPaidDate(payload.getPaidDate());
-		}
+		//if(payload.getPaidDate() != null) {
+		//	PaymentDetails.setPaidDate(payload.getPaidDate());
+		//}
 		return PaymentDetails;
 	}
 
@@ -167,5 +175,78 @@ public class PaymentService {
 		else 
 			throw new DetailsNotFound("Payment does not exist on file."); 
 			return null;
+	}
+	public Page<Payment> filteredPayments(JSONObject payload,int pageNo, int pageSize) throws ParseException {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		Page<Payment> allPayments;
+		Company company = new Company();
+		Subscription subscription = new Subscription();
+		Date startDate = new Date();
+		Date endDate = new Date();
+		String  paidDate2 = null;
+		boolean companyId = false;
+		boolean planId = false;
+		boolean date = false;
+		
+		//List<Orders> findByCreateddatetimeBetweenOrderByCreateddatetimeDesc(Date createddateBegin, Date createddateEnd);
+		
+		if(payload.containsKey("companyId") && payload.getAsString("companyId") != null && payload.getAsString("companyId") != "" ){
+			companyId = true;
+			company.setCompanyId(payload.getAsString("companyId"));
+		}
+		if(payload.containsKey("startDate") && payload.getAsString("startDate") != null && payload.getAsString("startDate") != "" ){
+			date = true;
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String a = payload.getAsString("paidDate");
+	        Date onedayorder = sdf.parse(a);
+			startDate = onedayorder;
+//			endDate.setHours(0);
+//			endDate.setMinutes(0);
+//			endDate.setSeconds(0);
+//			endDate.setDate(startDate.getDate()+1);
+//			endDate.setMonth(startDate.getMonth());
+//			endDate.setYear(startDate.getYear());
+		}
+		if(payload.containsKey("endDate") && payload.getAsString("endDate") != null && payload.getAsString("endDate") != "" ){
+			date = true;
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String a = payload.getAsString("endDate");
+	        Date onedayorder = sdf.parse(a);
+	        endDate = onedayorder;
+		}
+		if(payload.containsKey("planId") && payload.getAsString("planId") != null && payload.getAsString("planId") != ""){
+			planId = true;
+			subscription.setId(payload.getAsString("planId"));
+		}
+		if(companyId == true && planId == true && date == true) {
+			allPayments = paymentRepository.getByCompanyIdAndSubscriptionIdAndPaidDateBetween(company, subscription,startDate,endDate,paging);
+			return allPayments;
+		}
+		if(companyId == false && planId == true && date == true) {
+			allPayments = paymentRepository.getBySubscriptionIdAndPaidDateBetween( subscription,startDate,endDate,paging);
+			return allPayments;
+		}
+		if(companyId == true && planId == false && date == true) {
+			allPayments = paymentRepository.getByCompanyIdAndPaidDateBetween(company, startDate,endDate,paging);
+			return allPayments;
+		}
+		if(companyId == true && planId == true && date == false) {
+			allPayments = paymentRepository.getByCompanyIdAndSubscriptionId(company,  subscription,paging);
+			return allPayments;
+		}
+		if(companyId == true && planId == false && date == false) {
+			allPayments = paymentRepository.getByCompanyId(company,paging);
+			return allPayments;
+		}
+		if(companyId == false && planId == true && date == false) {
+			allPayments = paymentRepository.getBySubscriptionId( subscription,paging);
+			return allPayments;
+		}
+		if(companyId == false && planId == false && date == true) {
+			allPayments = paymentRepository.getByPaidDateBetween( startDate,endDate ,paging);
+			return allPayments;
+		}
+		
+		return null;
 	}
 }

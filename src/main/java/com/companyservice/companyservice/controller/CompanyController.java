@@ -14,6 +14,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,7 @@ public class CompanyController {
 	private MailService mailing;
 	@Autowired
 	private UserService userService;
+	
 	@PostMapping("/company/register")
 	public ResponseEntity<?> register(@RequestBody @Valid Company payload) throws Exception {
 		User regUser = companyService.companyRegistration(payload);
@@ -97,7 +99,8 @@ public class CompanyController {
 			System.out.println(limit);
 			limit = 10;
 		}
-		List<Company> companiesDetails =  companyService.getCompaniesDetailsPagination(page,limit);
+		//List<Company> companiesDetails =  companyService.getCompaniesDetailsPagination(page,limit);
+		Page<Company> companiesDetails =  companyService.getCompaniesDetailsPagination(page,limit);
 		if(!companiesDetails.isEmpty()) {
 			return new ResponseEntity<>(companiesDetails, HttpStatus.OK);
 		}
@@ -157,6 +160,7 @@ public class CompanyController {
 			return new ResponseEntity<>(htmlPage, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
 	@GetMapping("/company/send/link/{userId}")
 	public ResponseEntity<?> sendActivationLink(@PathVariable String userId) throws Exception{
 		User regUser =  userService.getUserByID(userId);
@@ -176,5 +180,24 @@ public class CompanyController {
 			throw new BadRequestException("Details not found.!");
 		}
 	}
+	
+	@Authorization
+	@PostMapping("/company/filter/{page}/{limit}")
+	public ResponseEntity<?> companyFilter(  @RequestBody JSONObject payload,@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		Page<Company> companiesDetails =  companyService.companyFilter(payload,page,limit);
+		if(companiesDetails != null) {
+			return new ResponseEntity<>(companiesDetails, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Companies data not found");
+		}
+	}
+	
 	
 }

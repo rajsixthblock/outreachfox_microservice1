@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -50,7 +51,8 @@ public class ScheduleController {
 		if(limit == 0) {
 			limit = 10;
 		}
-		List<Schedule> schedules =  scheduleService.getScheduleTimeZonesDetails(page,limit);
+		//List<Schedule> schedules =  scheduleService.getScheduleTimeZonesDetails(page,limit);
+		Page<Schedule> schedules =  scheduleService.getScheduleTimeZonesDetails(page,limit);
 		if(!schedules.isEmpty()) {
 			return new ResponseEntity<>(schedules, HttpStatus.OK);
 		}

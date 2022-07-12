@@ -39,11 +39,11 @@ public class ScheduleService {
 	}
 	
 	
-	public List<Schedule> getScheduleTimeZonesDetails(int pageNo, int pageSize) throws Exception {
+	public Page<Schedule> getScheduleTimeZonesDetails(int pageNo, int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Schedule> scheduleDetails =  scheduleRepository.findAll(paging);
-			return scheduleDetails.toList();
+			return scheduleDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {

@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,7 +28,7 @@ import com.companyservice.companyservice.service.SubscriptionService;
 @CrossOrigin
 @RestController
 @Logging
-@Authorization
+//@Authorization
 public class SubscriptionController {
 
 	@Autowired
@@ -52,7 +53,24 @@ public class SubscriptionController {
 		if(limit == 0) {
 			limit = 10;
 		}
-		List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
+		//List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
+		Page<Subscription> subscriptions = subscriptionService.getAll(page, limit);
+		if(!subscriptions.isEmpty()) {
+			return new ResponseEntity<>(subscriptions, HttpStatus.OK);
+		}else {
+			throw new DetailsNotFound("No plans found");
+		}
+	}
+	@GetMapping("/getAllPlans/{PlanType}/{page}/{limit}")
+	public ResponseEntity<?> getPlansByType(@PathVariable int page,@PathVariable int limit,@PathVariable String PlanType) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		//List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
+		Page<Subscription> subscriptions = subscriptionService.getAllByType(page, limit,PlanType);
 		if(!subscriptions.isEmpty()) {
 			return new ResponseEntity<>(subscriptions, HttpStatus.OK);
 		}else {

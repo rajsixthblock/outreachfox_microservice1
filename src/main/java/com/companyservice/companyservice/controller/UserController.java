@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -76,7 +77,7 @@ public class UserController {
 			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
 		}
 		else {
-			throw new DetailsNotFound("Companies data not found");
+			throw new DetailsNotFound("Users data not found");
 		}
 	}
 	@Authorization
@@ -88,12 +89,13 @@ public class UserController {
 		if(limit == 0) {
 			limit = 10;
 		}
-		List<User> companyDetails =  userService.getUsersDetails(companyId,page,limit);
+		//List<User> companyDetails =  userService.getUsersDetails(companyId,page,limit);
+		Page<User>  companyDetails =  userService.getUsersDetails(companyId,page,limit);
 		if(!companyDetails.isEmpty()) {
 			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
 		}
 		else {
-			throw new DetailsNotFound("Companies data not found");
+			throw new DetailsNotFound("Users data not found");
 		}
 	}
 	
@@ -101,12 +103,11 @@ public class UserController {
 	@GetMapping("/user/getByID/{id}")
 	public ResponseEntity<?> getByUserID(@PathVariable String id) throws Exception {
 		User userDetails =  userService.getUserByID(id);
-		if(userDetails.getUserId() != null) {
+		if(userDetails != null) {
 			return new ResponseEntity<>(userDetails, HttpStatus.OK);
 		}
 		else {
 			throw new DetailsNotFound("User details not found");
-			
 		}
 	}
 	
@@ -135,17 +136,36 @@ public class UserController {
 		}
 		
 	}
-	//@Authorization
+	@Authorization
 	@PutMapping("/user/password/update/{id}")
 	public ResponseEntity<?> updatePassword(@PathVariable String id, @RequestBody Password payload) throws Exception {
 		User userDetails =  userService.updatePassword(id, payload);
-		System.out.println(" Controller");
 		if(userDetails != null) {
 			return new ResponseEntity<>("Password updated successfully.!", HttpStatus.OK);
 		}
 		else {
 			throw new DetailsNotFound("User details not found");
 		}
+	}
+	@PutMapping("/user/password/forgot/{id}")
+	public ResponseEntity<?> forgotPassword(@PathVariable String id, @RequestBody JwtRequest payload) throws Exception {
+		User userDetails =  userService.forgotPassword(id, payload);
+		if(userDetails != null) {
+			return new ResponseEntity<>("Password updated successfully.!", HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Password updation failed.!");
+		}
+	}
+	@PostMapping("/user/password/forgot/email")
+	public ResponseEntity<?> sendLinkToUpdatePassword(@RequestBody JwtRequest jwtRequest) throws Exception {
+			User userDetails =  userService.sendLinkToUpdatePassword(jwtRequest);
+			if(userDetails != null) {
+				return new ResponseEntity<>("Password change link send to your registered mail id successfully.!", HttpStatus.OK);
+			}
+			else {
+				throw new DetailsNotFound("Link sending failed.!");
+			}
 	}
 	@GetMapping("/user/activate/{companyId}/{userId}")
 	public ResponseEntity<?> activationUser(@PathVariable String companyId,@PathVariable String userId){
@@ -159,6 +179,25 @@ public class UserController {
 			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activation failed.! Please contact admin </span><br></body></html>";
 			//throw new DetailsNotFound("Company details not found");
 			return new ResponseEntity<>(htmlPage, HttpStatus.BAD_REQUEST);
+		}
+	}
+	@Authorization
+	@PostMapping("/user/filter/{page}/{limit}")
+	public ResponseEntity<?> userFilter(  @RequestBody JSONObject payload,@PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			System.out.println("1");
+			page = 1;
+		}
+		if(limit == 0) {
+			System.out.println(limit);
+			limit = 10;
+		}
+		Page<User> usersList =  userService.userFilter(payload,page,limit);
+		if(usersList != null) {
+			return new ResponseEntity<>(usersList, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Users data not found");
 		}
 	}
 	

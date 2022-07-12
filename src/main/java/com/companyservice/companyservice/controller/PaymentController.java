@@ -1,9 +1,11 @@
 package com.companyservice.companyservice.controller;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +23,8 @@ import com.companyservice.companyservice.entity.Payment;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.service.PaymentService;
+
+import net.minidev.json.JSONObject;
 
 @CrossOrigin
 @RestController
@@ -50,7 +54,8 @@ public class PaymentController {
 		if(limit == 0) {
 			limit = 10;
 		}
-		List<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
+		//List<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
+		Page<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
 		if(!newPayment.isEmpty()) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
@@ -69,7 +74,7 @@ public class PaymentController {
 			System.out.println(limit);
 			limit = 10;
 		}
-		List<Payment> newPayment =  paymentService.getPaymentDetails(page,limit,companyId);
+		Page<Payment> newPayment =  paymentService.getPaymentDetails(page,limit,companyId);
 		if(newPayment != null) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
@@ -80,8 +85,8 @@ public class PaymentController {
 	
 	@GetMapping("/payment/getByID/{id}")
 	public ResponseEntity<?> getByPaymentID(@PathVariable String id) throws Exception {
-		Optional<Payment> newPayment =  paymentService.getPaymentID(id);
-		if(!newPayment.isEmpty()) {
+		Payment newPayment =  paymentService.getPaymentID(id);
+		if(newPayment != null) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
 		else {
@@ -110,5 +115,22 @@ public class PaymentController {
 			throw new DetailsNotFound("Payment details not found");
 		}
 		
+	}
+	@PostMapping("/payment/filter/{page}/{limit}")
+	public ResponseEntity<?> filter(@RequestBody JSONObject payload,@PathVariable int page,@PathVariable int limit) throws ParseException{
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			System.out.println(limit);
+			limit = 10;
+		}
+		Page<Payment> filteredPayments = paymentService.filteredPayments(payload,page,limit);
+		if(filteredPayments != null) {
+			return new ResponseEntity<>(filteredPayments, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Payment details not found");
+		}
 	}
 }

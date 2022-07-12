@@ -1,15 +1,25 @@
 package com.companyservice.companyservice.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.companyservice.companyservice.entity.*;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
@@ -50,11 +60,11 @@ public class TemplateService {
 		}
 		return null;
 	}
-	public List<Template> getTemplateDetails(int pageNo, int pageSize) throws Exception {
+	public Page<Template> getTemplateDetails(int pageNo, int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Template> templateDetails =  templateRepository.findAll(paging);
-			return templateDetails.toList();
+			return templateDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -140,5 +150,33 @@ public class TemplateService {
 			throw new DetailsNotFound("Template details not exist on file."); 
 			return null;
 	}
-
+	public String saveImage(MultipartFile file) throws IllegalStateException, IOException {
+		String directoryName = new File("..").getCanonicalPath()+"\\file\\uploads\\templateImages";
+		File directory = new File(directoryName);
+	    if (!directory.exists()){
+	    	System.out.println(directory);
+	        directory.mkdirs();
+	    }
+	    int dotIndex = file.getOriginalFilename().lastIndexOf('.');
+		String name = (dotIndex == -1) ? file.getOriginalFilename() : file.getOriginalFilename().substring(0, dotIndex);
+		String extension = "";
+		if (dotIndex > 0) {
+		    extension = file.getOriginalFilename().substring(dotIndex+1);
+		}
+		String fileName = name+"_"+new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())+"."+extension;
+		String path = directory+"\\"+name+"_"+new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())+"."+extension;
+		file.transferTo( new File(path));
+		return fileName;
+	}
+	public Resource viewTemplateImage(String fileName) throws IOException {
+		String directoryName = new File("..").getCanonicalPath()+"\\file\\uploads\\templateImages\\";
+		File directory = new File(directoryName);
+		Path file = Paths.get(directoryName).resolve(fileName).normalize();
+		Resource resource = new UrlResource(file.toUri());
+		if (resource.exists() || resource.isReadable()) {
+            return resource;
+        } else {
+            throw new RuntimeException("Could not read the file!");
+        }
+	}
 }

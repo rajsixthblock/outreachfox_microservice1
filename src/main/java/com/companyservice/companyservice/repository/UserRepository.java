@@ -22,6 +22,14 @@ public interface UserRepository extends CrudRepository<User, String>,PagingAndSo
 	List<User> findByCompanyId(String companyId);
 	Page<User> findByCompanyId(Company companyId,Pageable paging);
 	User getById(String id);
-
-	boolean existsByemail(String email);
+	User getByEmail(String email);
+	boolean existsByEmail(String email);
+	int countByCompanyId(Company companyId);
+	Page<User> getByCompanyIdAndName(Company companyId,String name,Pageable paging);
+	Page<User> getByCompanyIdAndEmail(Company companyId,String email,Pageable paging);
+	Page<User> getByCompanyIdAndPhone(Company companyId,long phone,Pageable paging);
+	Page<User> getByCompanyIdAndNameAndEmailAndPhone(Company companyId,String name,String email,long phone,Pageable paging);
+	Page<User> getByCompanyIdAndNameAndEmail(Company companyId,String name,String email,Pageable paging);
+	Page<User> getByCompanyIdAndNameAndPhone(Company companyId,String name,long phone,Pageable paging);
+	Page<User> getByCompanyIdAndEmailAndPhone(Company companyId,String email,long phone,Pageable paging);
 }

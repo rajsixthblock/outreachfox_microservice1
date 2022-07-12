@@ -44,9 +44,9 @@ public class Payment {
 	@Column(name = "`transactionId`",columnDefinition = "VARCHAR(30)", unique=true)
 	private String transactionId;
 	
-	@NotBlank(message = "Amount cannot be blank")
-	@Column(name = "`amount`",columnDefinition = "VARCHAR(100)")
-	private String amount;
+	//@NotBlank(message = "Amount cannot be blank")
+	@Column(name = "`amount`")
+	private double amount;
 	
 	@NotBlank(message = "Payment Mode cannot be blank")
 	@Column(name = "`paymentMode`",columnDefinition = "VARCHAR(30)")
@@ -54,7 +54,7 @@ public class Payment {
 	
 	//@NotNull(message = "Paid Date cannot be blank")
 	@Column(name = "`paidDate`")
-	private Date paidDate;
+	private Date paidDate = new Date();
 	
 	@Column(name = "`status`")
 	private boolean status;
@@ -130,12 +130,12 @@ public class Payment {
 	}
 
 
-	public String getAmount() {
+	public double getAmount() {
 		return amount;
 	}
 
 
-	public void setAmount(String amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 
@@ -182,7 +182,7 @@ public class Payment {
 	/** constructor with all arguments */
 	public Payment(String paymentId, Company companyId, Subscription subscriptionId,
 			@NotBlank(message = "Transaction Id cannot be blank") String transactionId,
-			@NotBlank(message = "Amount cannot be blank") String amount,
+			@NotBlank(message = "Amount cannot be blank") double amount,
 			@NotBlank(message = "Payment Mode cannot be blank") String paymentMode, Date paidDate, boolean status,
 			Date createdAt, Date updatedAt) {
 		super();

@@ -1,6 +1,9 @@
 package com.companyservice.companyservice.service;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +16,14 @@ import org.springframework.stereotype.Service;
 
 import com.companyservice.companyservice.SecurityConfiguration.SecurityConfig;
 import com.companyservice.companyservice.entity.Company;
+import com.companyservice.companyservice.entity.Payment;
 import com.companyservice.companyservice.entity.User;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.repository.CompanyRepository;
 import com.companyservice.companyservice.repository.UserRepository;
+
+import net.minidev.json.JSONObject;
 
 
 
@@ -73,11 +79,11 @@ public class CompanyService {
 		}
 		return null;
 	}
-	public List<Company> getCompaniesDetailsPagination(int pageNo, int pageSize) throws Exception {
+	public Page<Company> getCompaniesDetailsPagination(int pageNo, int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
 			Page<Company> companiesDetails =  companyRepository.findAll(paging);
-			return  companiesDetails.toList();
+			return  companiesDetails;
 		}
 		catch(Exception e){
 			if(e instanceof SQLException) {
@@ -180,6 +186,59 @@ public class CompanyService {
 			userDetails = userRepository.save(userDetails);
 			return companyDetails;
 		}
+	}
+	
+	public Page<Company> companyFilter(JSONObject payload, int pageNo, int pageSize){
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		boolean companyName = false;
+		boolean email = false;
+		boolean phone = false;
+		String name = null, email_id = null ;
+		long phone_no = 0;
+		Page<Company> allCompanies;
+		if(payload.containsKey("companyName") && payload.getAsString("companyName") != null && payload.getAsString("companyName") != "" ){
+			companyName = true;
+			name = payload.getAsString("companyName");
+		}
+		if(payload.containsKey("email") && payload.getAsString("email") != null && payload.getAsString("email") != ""){
+			email = true;
+			email_id = payload.getAsString("email");
+		}
+		if(payload.containsKey("phone") && payload.getAsString("phone") != null && payload.getAsString("phone") != ""){
+			phone = true;
+			phone_no = Long.parseLong(payload.getAsString("phone"));
+		}
+		if(companyName == true && email == true && phone == true) {
+			allCompanies =  companyRepository.getByCompanyNameAndEmailAndPhone(name, email_id, phone_no, paging);
+			return allCompanies;
+		}
+		if(companyName == false && email == true && phone == true) {
+			allCompanies =  companyRepository.getByEmailAndPhone(email_id, phone_no, paging);
+			return allCompanies;
+		}
+		if(companyName == true && email == false && phone == true) {
+			allCompanies =  companyRepository.getByCompanyNameAndPhone(name,  phone_no, paging);
+			return allCompanies;
+		}
+		if(companyName == true && email == true && phone == false) {
+			allCompanies =  companyRepository.getByCompanyNameAndEmail(name, email_id, paging);
+			return allCompanies;
+		}
+		if(companyName == true && email == false && phone == false) {
+			allCompanies =  companyRepository.getByCompanyName(name,  paging);
+			return allCompanies;
+		}
+		if(companyName == false && email == true && phone == false) {
+			allCompanies =  companyRepository.getByEmail( email_id,  paging);
+			return allCompanies;
+		}
+		if(companyName == false && email == false && phone == true) {
+			allCompanies =  companyRepository.getByPhone( phone_no, paging);
+			return allCompanies;
+		}
+		
+		return null;
+		
 	}
 
 }
