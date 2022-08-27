@@ -25,6 +25,8 @@ import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.repository.TemplateRepository;
 
+import net.minidev.json.JSONObject;
+
 
 @Service
 public class TemplateService {
@@ -40,9 +42,9 @@ public class TemplateService {
 			try {
 				newTemplate = templateRepository.save(payload);
 			}catch(Exception e) {
-				if(e instanceof DataIntegrityViolationException) {
+				//if(e instanceof DataIntegrityViolationException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
 		return newTemplate;
@@ -54,16 +56,16 @@ public class TemplateService {
 			return templateDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 	public Page<Template> getTemplateDetails(int pageNo, int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
 		try {
-			Page<Template> templateDetails =  templateRepository.findAll(paging);
+			Page<Template> templateDetails =  templateRepository.findAllByOrderByUpdatedAtDesc(paging);
 			return templateDetails;
 		}
 		catch(Exception e){
@@ -73,10 +75,12 @@ public class TemplateService {
 		}
 		return null;
 	}
-	
-	public Optional<Template> getTemplateID(String id) throws Exception {
+	public Page<Template> adminTemplates(String adminId,int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		AdminUser user = new AdminUser();
+		user.setAdminId(adminId);
 		try {
-			Optional<Template> templateDetails = templateRepository.findById(id);
+			Page<Template> templateDetails =  templateRepository.findByAdminIdOrderByUpdatedAtDesc(user,paging);
 			return templateDetails;
 		}
 		catch(Exception e){
@@ -85,6 +89,64 @@ public class TemplateService {
 			}
 		}
 		return null;
+	}
+	public Page<Template> adminTemplate(int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		AdminUser user = new AdminUser();
+		//user.setAdminId(adminId);
+		try {
+			Page<Template> templateDetails =  templateRepository.getByAdminId(paging);
+			return templateDetails;
+		}
+		catch(Exception e){
+			//if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			//}
+		}
+		//return null;
+	}
+	public List<Template> companyTemplatesAndAdminTemplates(String companyId) throws Exception {
+		//Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		Company company = new Company();
+		company.setCompanyId(companyId);
+		try {
+			List<Template> companyAdminTemplates =  templateRepository.getByCompanyId(company);
+//			List<Template> adminTemplates =  templateRepository.getByAdminId();
+			return companyAdminTemplates;
+		}
+		catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	public Page<Template> companyTemplates(String companyId,int pageNo, int pageSize) throws Exception {
+		Pageable paging = PageRequest.of(pageNo-1, pageSize);
+		Company company = new Company();
+		company.setCompanyId(companyId);
+		try {
+			Page<Template> templateDetails =  templateRepository.findByCompanyIdOrderByUpdatedAtDesc(company,paging);
+			return templateDetails;
+		}
+		catch(Exception e){
+			if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			}
+		}
+		return null;
+	}
+	public Template getTemplateID(String id) throws Exception {
+		try {
+			Template templateDetails = templateRepository.getById(id);
+			return templateDetails;
+		}
+		catch(Exception e){
+			//if(e instanceof SQLException) {
+				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
+			//}
+		}
+		//return null;
 	}
 	
 
@@ -119,7 +181,7 @@ public class TemplateService {
 		return null;
 	}
 
-	private Template setTemplateData(Template payload, Template TemplateDetails) {
+	Template setTemplateData(Template payload, Template TemplateDetails) {
 		if(payload.getName() != null) {
 			TemplateDetails.setName(payload.getName());
 		}
@@ -141,14 +203,14 @@ public class TemplateService {
 				return "Template deleted successfully.";
 			}
 			catch(Exception e){
-				if(e instanceof SQLException) {
+			//	if(e instanceof SQLException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+			//	}
 			}
 		}
 		else 
 			throw new DetailsNotFound("Template details not exist on file."); 
-			return null;
+			//return null;
 	}
 	public String saveImage(MultipartFile file) throws IllegalStateException, IOException {
 		String directoryName = new File("..").getCanonicalPath()+"\\file\\uploads\\templateImages";

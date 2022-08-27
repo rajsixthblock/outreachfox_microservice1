@@ -22,6 +22,9 @@ public class JwtRequest {
 		this.email = email;
 		this.password = password;
 	}
+	public JwtRequest() {
+		super();
+	}
 	@Override
 	public String toString() {
 		return "JwtRequest [email=" + email + ", password=" + password + "]";

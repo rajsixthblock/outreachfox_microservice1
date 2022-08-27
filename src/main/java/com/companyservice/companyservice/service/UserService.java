@@ -63,9 +63,9 @@ public class UserService {
 			try {
 				regUser = userRepository.save(payload);
 			}catch(Exception e) {
-				if(e instanceof DataIntegrityViolationException) {
+			//	if(e instanceof DataIntegrityViolationException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
 		return regUser;
@@ -111,11 +111,11 @@ public class UserService {
 			return companiesDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 	
 	public Page<User> getUsersDetails(String companyId,int pageNo,int pageSize) throws Exception {
@@ -137,15 +137,15 @@ public class UserService {
 	
 	public User getUserByID(String id) throws Exception {
 		try {
-			User userDetails = userRepository.findById(id).orElse(null);
+			User userDetails = userRepository.getById(id);
 			return userDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 
 	public User updateUser(String id, User payload) throws Exception {		
@@ -177,7 +177,7 @@ public class UserService {
 		return null;
 	}
 
-	private User setUserData(User payload, User userDetails) {
+	User setUserData(User payload, User userDetails) {
 		if(payload.getName() != null) {
 			userDetails.setName(payload.getName());
 		}
@@ -202,14 +202,14 @@ public class UserService {
 				return "User deleted successfully";
 			}
 			catch(Exception e){
-				if(e instanceof SQLException) {
+				//if(e instanceof SQLException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
 		else 
 			throw new DetailsNotFound("User does not exist.!"); 
-			return null;
+			//return null;
 	}
 	
 	public User updatePassword(String id, Password payload) throws Exception {
@@ -243,9 +243,9 @@ public class UserService {
 					userDetails = userRepository.save(userDetails);
 					return userDetails;
 				}catch(Exception e){
-					if(e instanceof SQLException) {
+					//if(e instanceof SQLException) {
 						throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-					}
+					//}
 				}
 			}else {
 				throw new BadRequestException("Please enter valid password.!");
@@ -253,7 +253,7 @@ public class UserService {
 		}else {
 			throw new BadRequestException("Please provide valid details.!");
 		}
-		return null;
+		//return null;
 	}
 	public User sendLinkToUpdatePassword(JwtRequest jwtRequest) throws MessagingException, IOException {
 		if(userRepository.existsByEmail(jwtRequest.getEmail())) {

@@ -92,7 +92,7 @@ public class AdminUserService {
 	
 	public AdminUser getUserDetailsByAdmin(String id) throws Exception {
 		try {
-			AdminUser userDetails = adminUserRepository.findById(id).orElse(null);
+			AdminUser userDetails = adminUserRepository.getByAdminId(id);
 			return userDetails;
 		}
 		catch(Exception e){
@@ -102,7 +102,7 @@ public class AdminUserService {
 		}
 		return null;
 	}
-	private AdminUser setUserData(AdminUser payload, AdminUser userDetails) {
+	AdminUser setUserData(AdminUser payload, AdminUser userDetails) {
 		if(payload.getName() != null) {
 			userDetails.setName(payload.getName());
 		}

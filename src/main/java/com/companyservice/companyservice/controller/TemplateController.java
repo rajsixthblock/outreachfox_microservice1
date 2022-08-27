@@ -27,6 +27,8 @@ import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
 import com.companyservice.companyservice.service.TemplateService;
 
+import net.minidev.json.JSONObject;
+
 @RestController
 @CrossOrigin
 @Logging
@@ -40,7 +42,7 @@ public class TemplateController {
 	@PostMapping("/template/create")
 	public ResponseEntity<?> save( @RequestBody @Valid Template payload) throws Exception {
 		Template newTemplate = templateService.saveTemplate(payload);
-		if(newTemplate.getTemplateId() != null) {
+		if(newTemplate != null) {
 			return new ResponseEntity<>(newTemplate, HttpStatus.CREATED);
 		}
 		else {
@@ -59,7 +61,73 @@ public class TemplateController {
 		}
 		//List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
 		Page<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
-		if(!newTemplate.isEmpty()) {
+		if(newTemplate != null) {
+			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Template details not found");
+		}
+	}
+	@Authorization
+	@GetMapping("/template/admintemplates/{adminId}/{page}/{limit}")
+	public ResponseEntity<?> adminTemplates(@PathVariable String adminId, @PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		//List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
+		Page<Template> newTemplate =  templateService.adminTemplates(adminId,page, limit);
+		if(newTemplate != null) {
+			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Template details not found");
+		}
+	}
+	@Authorization
+	@GetMapping("/template/admintemplates/{page}/{limit}")
+	public ResponseEntity<?> adminTemplate( @PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		//List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
+		Page<Template> newTemplate =  templateService.adminTemplate(page, limit);
+		if(newTemplate != null) {
+			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Template details not found");
+		}
+	}
+	@Authorization
+	@GetMapping("/template/dropdowns/{companyId}")
+	public ResponseEntity<?> companyTemplatesAndAdminTemplates(@PathVariable String companyId) throws Exception {
+		//List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
+		List<Template> newTemplate =  templateService.companyTemplatesAndAdminTemplates(companyId);
+		if(newTemplate != null) {
+			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
+		}
+		else {
+			throw new DetailsNotFound("Template details not found");
+		}
+	}
+	@Authorization
+	@GetMapping("/template/companytemplates/{companyId}/{page}/{limit}")
+	public ResponseEntity<?> companyTemplates(@PathVariable String companyId, @PathVariable int page,@PathVariable int limit) throws Exception {
+		if(page == 0) {
+			page = 1;
+		}
+		if(limit == 0) {
+			limit = 10;
+		}
+		//List<Template> newTemplate =  templateService.getTemplateDetails(page, limit);
+		Page<Template> newTemplate =  templateService.companyTemplates(companyId,page, limit);
+		if(newTemplate != null) {
 			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
 		}
 		else {
@@ -72,7 +140,7 @@ public class TemplateController {
 	public ResponseEntity<?> getTemplates() throws Exception {
 		
 		List<Template> newTemplate =  templateService.getTemplateDetails();
-		if(!newTemplate.isEmpty()) {
+		if(newTemplate != null) {
 			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
 		}
 		else {
@@ -83,8 +151,8 @@ public class TemplateController {
 	@Authorization
 	@GetMapping("/template/getByID/{id}")
 	public ResponseEntity<?> getByTemplateID(@PathVariable String id) throws Exception {
-		Optional<Template> newTemplate =  templateService.getTemplateID(id);
-		if(!newTemplate.isEmpty()) {
+		Template newTemplate =  templateService.getTemplateID(id);
+		if(newTemplate != null) {
 			return new ResponseEntity<>(newTemplate, HttpStatus.OK);
 		}
 		else {

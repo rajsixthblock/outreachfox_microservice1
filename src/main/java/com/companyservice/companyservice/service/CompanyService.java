@@ -4,7 +4,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
@@ -20,6 +22,8 @@ import com.companyservice.companyservice.entity.Payment;
 import com.companyservice.companyservice.entity.User;
 import com.companyservice.companyservice.exception.BadRequestException;
 import com.companyservice.companyservice.exception.DetailsNotFound;
+import com.companyservice.companyservice.repository.AudienceRepository;
+import com.companyservice.companyservice.repository.CampaignRepository;
 import com.companyservice.companyservice.repository.CompanyRepository;
 import com.companyservice.companyservice.repository.UserRepository;
 
@@ -36,7 +40,10 @@ public class CompanyService {
 	private SecurityConfig securityConfig;
 	@Autowired
 	private UserRepository userRepository;
-	
+	@Autowired 
+	private CampaignRepository campaignRepository;
+	@Autowired
+	private AudienceRepository audienceRepository;
 	public User companyRegistration(Company payload) throws Exception {
 		
 		Company regCompany = new Company();
@@ -59,12 +66,12 @@ public class CompanyService {
 				user = userRepository.save(user);
 				return user;
 			}catch(Exception e) {
-				if(e instanceof DataIntegrityViolationException) {
+				//if(e instanceof DataIntegrityViolationException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
-		return user;
+		//return user;
 	}
 	
 	public List<Company> getCompaniesDetails() throws Exception {
@@ -73,11 +80,11 @@ public class CompanyService {
 			return companiesDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 	public Page<Company> getCompaniesDetailsPagination(int pageNo, int pageSize) throws Exception {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
@@ -136,7 +143,7 @@ public class CompanyService {
 		return null;
 	}
 
-	private Company setcompanyData(Company payload, Company companyDetails) {
+	Company setcompanyData(Company payload, Company companyDetails) {
 		if(payload.getEmail() != null) {
 			companyDetails.setEmail(payload.getEmail());
 		}
@@ -238,6 +245,20 @@ public class CompanyService {
 		}
 		
 		return null;
+		
+	}
+	
+	public HashMap counting(List<Company> companies) {
+		HashMap<String,JSONObject> count = new HashMap<String,JSONObject>();
+		for(int i = 0; i < companies.size(); i++) {
+			long campaignesCount = campaignRepository.countByCompanyId(companies.get(i));
+			long contactsCount = audienceRepository.countByCompanyId(companies.get(i));
+			JSONObject object = new JSONObject();
+			object.appendField("campaignesCount", campaignesCount);
+			object.appendField("contactsCount", contactsCount);
+			count.put(companies.get(i).getCompanyId(), object);
+		}
+		return count;
 		
 	}
 

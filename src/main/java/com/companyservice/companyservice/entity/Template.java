@@ -5,11 +5,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import net.minidev.json.JSONObject;
 
@@ -23,16 +31,29 @@ public class Template {
 	@Id
 	private String templateId;
 	
+	@JoinColumn(name = "companyId", referencedColumnName = "companyId")
+	@ManyToOne
+	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"subscriptionId","password","status","address","createdAt","updatedAt"})
+	private Company companyId;
+	
+	@JoinColumn(name = "adminId", referencedColumnName = "adminId")
+	@ManyToOne
+	@NotFound(action = NotFoundAction.IGNORE)
+	@JsonIgnoreProperties({"password","status","address","createdAt","updatedAt"})
+	private AdminUser adminId;
+	
 	@NotBlank(message = "name can't be blank")
 	@Column(name = "`name`",columnDefinition = "VARCHAR(100)", unique=true)
 	private String name;
 	
+	@Lob
 	@Column(name = "`templateData`")
 	private JSONObject templateData;
 	
 	@Column(name = "`status`")
 	private boolean status;
-	
+
 	@CreationTimestamp
 	@Column(name = "`createdAt`")
 	private java.sql.Timestamp createdAt;
@@ -47,8 +68,24 @@ public class Template {
 		return templateId;
 	}
 
+	public Company getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(Company companyId) {
+		this.companyId = companyId;
+	}
+
 	public void setTemplateId(String templateId) {
 		this.templateId = templateId;
+	}
+
+	public AdminUser getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(AdminUser adminId) {
+		this.adminId = adminId;
 	}
 
 	public String getName() {
@@ -91,12 +128,26 @@ public class Template {
 		this.updatedAt = updatedAt;
 	}
 	
-	/** constructor with all arguments */
+	/** constructor with no arguments */
 	
-	public Template(String templateId, @NotBlank(message = "name can't be blank") String name, JSONObject templateData,
-			boolean status, Timestamp createdAt, Timestamp updatedAt) {
+	public Template() {
+		super();
+	}
+	
+	@Override
+	public String toString() {
+		return "AdminTemplate [templateId=" + templateId + ", companyId=" + companyId + ", adminId=" + adminId
+				+ ", name=" + name + ", templateData=" + templateData + ", status=" + status + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + "]";
+	}
+	/** constructor with all arguments */
+	public Template(String templateId, Company companyId, AdminUser adminId,
+			@NotBlank(message = "name can't be blank") String name, JSONObject templateData, boolean status,
+			Timestamp createdAt, Timestamp updatedAt) {
 		super();
 		this.templateId = templateId;
+		this.companyId = companyId;
+		this.adminId = adminId;
 		this.name = name;
 		this.templateData = templateData;
 		this.status = status;
@@ -104,18 +155,4 @@ public class Template {
 		this.updatedAt = updatedAt;
 	}
 	
-	/** constructor with no arguments */
-	
-	public Template() {
-		super();
-	}
-	
-	/** To String method */
-	@Override
-	public String toString() {
-		return "Template [templateId=" + templateId + ", name=" + name + ", templateData=" + templateData + ", status="
-				+ status + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
-	}
-	
-	 
 }

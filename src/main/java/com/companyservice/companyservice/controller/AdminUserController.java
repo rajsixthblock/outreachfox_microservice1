@@ -39,7 +39,7 @@ public class AdminUserController {
 	@PostMapping("/user/creation/by/admin")
 	public ResponseEntity<?> create(@RequestBody @Valid AdminUser payload) throws Exception {
 		AdminUser regUser = adminUserService.adminCreation(payload);
-		if(regUser.getAdminId() != null) {
+		if(regUser != null) {
 			return new ResponseEntity<>(regUser, HttpStatus.CREATED);
 		}
 		else {
@@ -50,7 +50,7 @@ public class AdminUserController {
 	@PostMapping("/admin/user/creation")
 	public ResponseEntity<?> adminCreate(@RequestBody @Valid AdminUser payload) throws Exception {
 		AdminUser regUser = adminUserService.adminCreation(payload);
-		if(regUser.getAdminId() != null) {
+		if(regUser != null) {
 			return new ResponseEntity<>(regUser, HttpStatus.CREATED);
 		}
 		else {
@@ -79,7 +79,7 @@ public class AdminUserController {
 		}
 		//List<User> companyDetails =  userService.getUsersDetails(companyId,page,limit);
 		Page<AdminUser>  companyDetails =  adminUserService.getAllUsers(page,limit);
-		if(!companyDetails.isEmpty()) {
+		if(companyDetails != null) {
 			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
 		}
 		else {
@@ -115,7 +115,7 @@ public class AdminUserController {
 	@DeleteMapping("/admin/user/delete/{id}")
 	public ResponseEntity<?> deleteUserByAdmin(@PathVariable String id) throws Exception {	
 		String response =  adminUserService.deleteUserByAdmin(id);
-		if(response != "") {
+		if(response != null) {
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 		else {

@@ -38,7 +38,7 @@ public class PaymentController {
 	@PostMapping("/payment/create/{companyId}/{subscriptionId}")
 	public ResponseEntity<?> save(@PathVariable String companyId,@PathVariable String subscriptionId,  @RequestBody @Valid Payment payload) throws Exception {
 		Payment newPayment = paymentService.savePayment(companyId,subscriptionId, payload);
-		if(newPayment.getPaymentId() != null) {
+		if(newPayment != null) {
 			return new ResponseEntity<>(newPayment, HttpStatus.CREATED);
 		}
 		else {
@@ -47,7 +47,7 @@ public class PaymentController {
 	}
 	
 	@GetMapping("/payment/getAllPayments/{page}/{limit}")
-	public ResponseEntity<?> getPayments(@PathVariable int page,@PathVariable int limit) throws Exception {
+	public ResponseEntity<Page<Payment>> getPayments(@PathVariable int page,@PathVariable int limit) throws Exception {
 		if(page == 0) {
 			page = 1;
 		}
@@ -56,7 +56,7 @@ public class PaymentController {
 		}
 		//List<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
 		Page<Payment> newPayment =  paymentService.getPaymentDetails(page, limit);
-		if(!newPayment.isEmpty()) {
+		if(newPayment != null) {
 			return new ResponseEntity<>(newPayment, HttpStatus.OK);
 		}
 		else {

@@ -68,7 +68,7 @@ public class SubscriptionService {
 	
 	public Subscription getById(String id) throws Exception {
 		try {
-			Subscription subscription = subscriptionRepository.findById(id).orElse(null);
+			Subscription subscription = subscriptionRepository.getById(id);
 			return subscription;
 		}catch(Exception e){
 			if(e instanceof SQLException) {
@@ -80,7 +80,7 @@ public class SubscriptionService {
 	public Subscription updateSubscription(String id, Subscription payload) throws Exception {
 		if(subscriptionRepository.existsById(id)) {
 			Subscription subscription = subscriptionRepository.getById(id);
-			if(subscription.getPlanName().equals(payload.getPlanName()) && subscription.getPlanType().equals(payload.getPlanType()) ){
+			if(subscription.getPlanName().equals(payload.getPlanName()) && subscription.getPlanType() != null && subscription.getPlanType().equals(payload.getPlanType()) ){
 				subscription = setsubscriptionData(payload, subscription);
 			} 
 			else {
@@ -104,7 +104,7 @@ public class SubscriptionService {
 		return null;
 	}
 	
-	private Subscription setsubscriptionData(Subscription payload, Subscription subscription) {
+	Subscription setsubscriptionData(Subscription payload, Subscription subscription) {
 		if(payload.getPlanName() != null) {
 			subscription.setPlanName(payload.getPlanName());
 		}
@@ -116,6 +116,9 @@ public class SubscriptionService {
 		}
 		if(payload.getCurrencyType() != null) {
 			subscription.setCurrencyType(payload.getCurrencyType());
+		}
+		if(payload.getPlanType() != null) {
+			subscription.setPlanType(payload.getPlanType());
 		}
 		if(payload.isStatus()) {
 			subscription.setStatus(payload.isStatus());

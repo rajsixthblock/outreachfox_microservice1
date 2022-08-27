@@ -28,7 +28,7 @@ import com.companyservice.companyservice.service.SubscriptionService;
 @CrossOrigin
 @RestController
 @Logging
-//@Authorization
+@Authorization
 public class SubscriptionController {
 
 	@Autowired
@@ -37,7 +37,7 @@ public class SubscriptionController {
 	@PostMapping("/plan/create")
 	public ResponseEntity<?> creation(@RequestBody @Valid Subscription payload) throws Exception{
 		Subscription subscription =  subscriptionService.create(payload);
-		if(subscription.getId() != null) {
+		if(subscription != null) {
 			return new ResponseEntity<>(subscription, HttpStatus.CREATED);
 		}else {
 			throw new BadRequestException("Plan Creation failed");
@@ -55,7 +55,7 @@ public class SubscriptionController {
 		}
 		//List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
 		Page<Subscription> subscriptions = subscriptionService.getAll(page, limit);
-		if(!subscriptions.isEmpty()) {
+		if(subscriptions != null) {
 			return new ResponseEntity<>(subscriptions, HttpStatus.OK);
 		}else {
 			throw new DetailsNotFound("No plans found");
@@ -71,7 +71,7 @@ public class SubscriptionController {
 		}
 		//List<Subscription> subscriptions = subscriptionService.getAll(page, limit);
 		Page<Subscription> subscriptions = subscriptionService.getAllByType(page, limit,PlanType);
-		if(!subscriptions.isEmpty()) {
+		if(subscriptions != null) {
 			return new ResponseEntity<>(subscriptions, HttpStatus.OK);
 		}else {
 			throw new DetailsNotFound("No plans found");

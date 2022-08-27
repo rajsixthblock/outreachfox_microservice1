@@ -49,7 +49,7 @@ public class UserController {
 	@PostMapping("/user/create/{companyId}")
 	public ResponseEntity<?> create( @PathVariable String companyId, @RequestBody @Valid User payload) throws Exception {
 		User regUser = userService.creation(companyId,payload);
-		if(regUser.getUserId() != null) {
+		if(regUser != null) {
 			return new ResponseEntity<>(regUser, HttpStatus.CREATED);
 		}
 		else {
@@ -73,7 +73,7 @@ public class UserController {
 	@GetMapping("/user/getUsers/{companyId}")
 	public ResponseEntity<?> getUsers(@PathVariable String companyId) throws Exception {
 		List<User> companyDetails =  userService.getUsersDetails(companyId);
-		if(!companyDetails.isEmpty()) {
+		if(companyDetails != null) {
 			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
 		}
 		else {
@@ -91,7 +91,7 @@ public class UserController {
 		}
 		//List<User> companyDetails =  userService.getUsersDetails(companyId,page,limit);
 		Page<User>  companyDetails =  userService.getUsersDetails(companyId,page,limit);
-		if(!companyDetails.isEmpty()) {
+		if(companyDetails != null) {
 			return new ResponseEntity<>(companyDetails, HttpStatus.OK);
 		}
 		else {
@@ -128,7 +128,7 @@ public class UserController {
 	@DeleteMapping("/user/delete/{id}")
 	public ResponseEntity<?> deleteUser(@PathVariable String id) throws Exception {	
 		String response =  userService.deleteUserByID(id);
-		if(response != "") {
+		if(response != null) {
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 		else {
@@ -170,7 +170,7 @@ public class UserController {
 	@GetMapping("/user/activate/{companyId}/{userId}")
 	public ResponseEntity<?> activationUser(@PathVariable String companyId,@PathVariable String userId){
 		Company companyDetails =  companyService.activateCompany(companyId,userId);
-		if(companyDetails.getCompanyId() != null) {
+		if(companyDetails  != null) {
 			String htmlPage = "<html><head><title>Login page link.</title><style>body{background-color: #ed7117;text-align:center;color:white; margin-top:100px;font-size:50px}a{text-decoration:none;color:white;}button{padding-top:5px;padding-bottom:5px;padding-left:15px;padding-right:15px;font-size:20px;border:2px solid white;border-radius:5px;background-color: #ed7117;}</style></head><body ><span>Account activated successfully.! </span><br><span>Please <button><a href="+userLoginPath+">Log in</a></button></span></body></html>";
 			return new ResponseEntity<>(htmlPage, HttpStatus.OK);
 		}

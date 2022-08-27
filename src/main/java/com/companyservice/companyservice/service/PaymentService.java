@@ -50,9 +50,9 @@ public class PaymentService {
 				newPayment = paymentRepository.save(payload);
 				company = companyRepository.save(company);
 			}catch(Exception e) {
-				if(e instanceof DataIntegrityViolationException) {
+				//if(e instanceof DataIntegrityViolationException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
 		
@@ -66,11 +66,11 @@ public class PaymentService {
 			return paymentDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 	
 	public Page<Payment> getPaymentDetails(int pageNo,int pageSize,String companyId) throws Exception {
@@ -82,24 +82,24 @@ public class PaymentService {
 			return paymentDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 	
 	public Payment getPaymentID(String id) throws Exception {
 		try {
-			Payment paymentDetails = paymentRepository.findById(id).orElse(null);
+			Payment paymentDetails = paymentRepository.getById(id);
 			return paymentDetails;
 		}
 		catch(Exception e){
-			if(e instanceof SQLException) {
+			//if(e instanceof SQLException) {
 				throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-			}
+			//}
 		}
-		return null;
+		//return null;
 	}
 
 	public Payment updatePayment(String id, Payment payload) throws Exception {
@@ -167,14 +167,14 @@ public class PaymentService {
 				return "Payment deleted successfully.";
 			}
 			catch(Exception e){
-				if(e instanceof SQLException) {
+				//if(e instanceof SQLException) {
 					throw new Exception(((NestedRuntimeException) e).getMostSpecificCause().getMessage());
-				}
+				//}
 			}
 		}
 		else 
 			throw new DetailsNotFound("Payment does not exist on file."); 
-			return null;
+			//return null;
 	}
 	public Page<Payment> filteredPayments(JSONObject payload,int pageNo, int pageSize) throws ParseException {
 		Pageable paging = PageRequest.of(pageNo-1, pageSize);
